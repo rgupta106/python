@@ -632,17 +632,17 @@ free (commbuffer);
      *
    */
 
-  if (geo.coord_type == CYLIND)
+  if (xdom[0].coord_type == CYLIND)
     cylind_extend_density (w);
-  else if (geo.coord_type == RTHETA)
+  else if (xdom[0].coord_type == RTHETA)
     rtheta_extend_density (w);
-  else if (geo.coord_type == SPHERICAL)
+  else if (xdom[0].coord_type == SPHERICAL)
     spherical_extend_density (w);
-  else if (geo.coord_type == CYLVAR)
+  else if (xdom[0].coord_type == CYLVAR)
     cylvar_extend_density (w);
   else
     {
-      Error ("Wind_update2d: Unknown coordinate type %d\n", geo.coord_type);
+      Error ("Wind_update2d: Unknown coordinate type %d\n", xdom[0].coord_type);
       exit (0);
     }
 

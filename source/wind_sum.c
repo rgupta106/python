@@ -59,7 +59,7 @@ xtemp_rad (w)
     py_wind_delta = 1 + MDIM / 30;
 
 
-  if (geo.coord_type != 1)
+  if (xdom[0].coord_type != 1)
     {
       Log
 	("Warning: Since coord type is not cylindrical, next print out may look odd\n");

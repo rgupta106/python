@@ -85,7 +85,7 @@ dvwind_ds (p)
   tensor ought to be rotated in order to give the right answer for spherical 
   coordinates */
 
-  if (geo.coord_type == SPHERICAL)
+  if (xdom[0].coord_type == SPHERICAL)
     {
       struct photon pnew;
       double v1[3], v2[3], diff[3];

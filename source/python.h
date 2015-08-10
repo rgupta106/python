@@ -118,6 +118,32 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 #define NCOMPS 	10
 #define LINELENGTH 	160
 
+/* This structure contains the information needed for each separate region of space, e.g the
+ * wind and the disk
+ */
+
+int ndomain;  /*The number of domains in a model*/
+
+enum coord_type_enum
+  	{	SPHERICAL 	=0,
+		CYLIND 		=1,
+		RTHETA		=2,
+		CYLVAR      =3
+  	}; 
+
+
+struct domain
+{
+	char name[LINELENGTH];
+	int NDIM,MDIM,NDIM2;
+	int ndim,mdim,ndim2;
+	int nstart;  //the beginning location in wmain of this component
+  	enum coord_type_enum coord_type;
+
+}
+xdom[10];   // One structure for each domain
+
+
 struct geometry
 {
 /* 67 - ksl This section added to allow for restarting the program, and adds parameters used
@@ -127,14 +153,11 @@ struct geometry
   int wcycles, pcycles;		/* The number of ionization and spectrum cycles desired */
 
 /* Begin description of the actual geometery */
-  enum coord_type_enum
-  	{	SPHERICAL 	=0,
-		CYLIND 		=1,
-		RTHETA		=2,
-		CYLVAR      =3
-  	} coord_type;
+  // XXX  This needs to be removed from geometry
+//  enum coord_type_enum coord_type;
 
-  int ndim, mdim;	/* The type of geometry and dimensionality of the wind array. 
+//  int ndim, mdim;	
+/* The type of geometry and dimensionality of the wind array. 
 				   0=1-d spherical, 1=cylindrical, 2 = spherical polar, 3=cylindrical
 				   but the z coordinate changes with rho in an attempt to allow for
 				   a vertically extended disk....

@@ -59,21 +59,21 @@ get_shell_wind_params ()
 
 /* In order to make life simple, we are first going to check that we are in spherical coordinates, if not change!! */
 
-  if (geo.coord_type != SPHERICAL)
+  if (xdom[0].coord_type != SPHERICAL)
     {
       Error
 	("For the shell type wind, we should be in spherical coordinates - changing....\n");
-      geo.coord_type = 0;
+      xdom[0].coord_type = 0;
     }
 
 /* This may not be important, but we sould make sure that NDIM is 4... */
 
-  if (geo.ndim != 4)
+  if (xdom[0].ndim != 4)
     {
       Error
 	("For the shell type wind, we take control of the grid, and need NDIM to be the minimum - 4 - changing\n");
-      geo.ndim = 4;
-      geo.mdim = 1;
+      xdom[0].ndim = 4;
+      xdom[0].mdim = 1;
     }
 
 

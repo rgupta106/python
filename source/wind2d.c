@@ -100,8 +100,8 @@ define_wind ()
      to define the wind at least one grid cell outside the region in which we want photons
      to propagate.  This is the reason we divide by NDIM-2 here, rather than NDIM-1 */
 
-  NDIM = ndim = geo.ndim;
-  MDIM = mdim = geo.mdim;
+  NDIM = ndim = xdom[0].ndim;
+  MDIM = mdim = xdom[0].mdim;
   NDIM2 = NDIM * MDIM;
   calloc_wind (NDIM2);
   w = wmain;
@@ -113,7 +113,7 @@ define_wind ()
       w[n].inwind = W_NOT_INWIND;
     }
 
-  //printf ("Got to define wind %i\n",geo.coord_type);
+  //printf ("Got to define wind %i\n",xdom[0].coord_type);
 
   if (geo.wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
     {
@@ -121,15 +121,15 @@ define_wind ()
 	("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
       shell_make_grid (w);
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (xdom[0].coord_type == SPHERICAL)
     {
       spherical_make_grid (w);
     }
-  else if (geo.coord_type == CYLIND)
+  else if (xdom[0].coord_type == CYLIND)
     {
       cylind_make_grid (w);
     }
-  else if (geo.coord_type == RTHETA)
+  else if (xdom[0].coord_type == RTHETA)
     {
       if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
       	{
@@ -140,14 +140,14 @@ define_wind ()
         rtheta_make_grid (w);
 	}
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (xdom[0].coord_type == CYLVAR)
     {
       cylvar_make_grid (w);
     }
   else
     {
       Error ("define_wind: Don't know how to make coordinate type %d\n",
-	     geo.coord_type);
+	     xdom[0].coord_type);
     }
   for (n = 0; n < NDIM2; n++)
     {
@@ -180,15 +180,15 @@ recreated when a windfile is read into the program
    */
 
 
-  if (geo.coord_type == SPHERICAL)
+  if (xdom[0].coord_type == SPHERICAL)
     {
       spherical_volumes (w, W_ALL_INWIND);
     }
-  else if (geo.coord_type == CYLIND)
+  else if (xdom[0].coord_type == CYLIND)
     {
       cylind_volumes (w, W_ALL_INWIND);
     }
-  else if (geo.coord_type == RTHETA)
+  else if (xdom[0].coord_type == RTHETA)
     {
       if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates We dont need to work out if cells are in the wind, they are known to be in the wind.
       	{
@@ -199,7 +199,7 @@ recreated when a windfile is read into the program
         rtheta_volumes (w, W_ALL_INWIND);
 	}
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (xdom[0].coord_type == CYLVAR)
     {
       cylvar_volumes (w, W_ALL_INWIND);
     }
@@ -207,7 +207,7 @@ recreated when a windfile is read into the program
     {
       Error
 	("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
-	 geo.coord_type);
+	 xdom[0].coord_type);
     }
 
 /* Now check if there is a second component and if so get the volumes for these cells as well */
@@ -215,19 +215,19 @@ recreated when a windfile is read into the program
   if (geo.compton_torus)
     {
 
-      if (geo.coord_type == SPHERICAL)
+      if (xdom[0].coord_type == SPHERICAL)
 	{
 	  spherical_volumes (w, W_ALL_INTORUS);
 	}
-      else if (geo.coord_type == CYLIND)
+      else if (xdom[0].coord_type == CYLIND)
 	{
 	  cylind_volumes (w, W_ALL_INTORUS);
 	}
-      else if (geo.coord_type == RTHETA)
+      else if (xdom[0].coord_type == RTHETA)
 	{
 	  rtheta_volumes (w, W_ALL_INTORUS);
 	}
-      else if (geo.coord_type == CYLVAR)
+      else if (xdom[0].coord_type == CYLVAR)
 	{
 	  cylvar_volumes (w, W_ALL_INTORUS);
 	}
@@ -235,7 +235,7 @@ recreated when a windfile is read into the program
 	{
 	  Error
 	    ("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
-	     geo.coord_type);
+	     xdom[0].coord_type);
 	}
 
     }
@@ -275,7 +275,7 @@ recreated when a windfile is read into the program
 /* 56d --Now check the volume calculations for 2d wind models 
    58b --If corners are in the wind, but there is zero_volume then ignore.
 */
-  if (geo.coord_type != SPHERICAL)
+  if (xdom[0].coord_type != SPHERICAL)
     {
       for (n = 0; n < NDIM2; n++)
 	{
@@ -484,7 +484,7 @@ be optional which variables beyond here are moved to structures othere than Wind
      which is below. One would simply integrate over various surface integrals to make it happen.  
 */
 
-  if (geo.coord_type == CYLIND)
+  if (xdom[0].coord_type == CYLIND)
     {
       mdotwind = 0;
       mdotbase = 0;
@@ -519,7 +519,7 @@ be optional which variables beyond here are moved to structures othere than Wind
     {
       Error
 	("wind2d.c: Don't know how to check wind mdot for this coordtype %d\n",
-	 geo.coord_type);
+	 xdom[0].coord_type);
     }
 
   return (0);
@@ -577,25 +577,25 @@ where_in_grid (x)
   if (wig_x != x[0] || wig_y != x[1] || wig_z != x[2])	// Calculate if new position
     {
 
-      if (geo.coord_type == CYLIND)
+      if (xdom[0].coord_type == CYLIND)
 	{
 	  n = cylind_where_in_grid (x);
 	}
-      else if (geo.coord_type == RTHETA)
+      else if (xdom[0].coord_type == RTHETA)
 	{
 	  n = rtheta_where_in_grid (x);
 	}
-      else if (geo.coord_type == SPHERICAL)
+      else if (xdom[0].coord_type == SPHERICAL)
 	{
 	  n = spherical_where_in_grid (x);
 	}
-      else if (geo.coord_type == CYLVAR)
+      else if (xdom[0].coord_type == CYLVAR)
 	{
 	  n = cylvar_where_in_grid (x, 0, &fx, &fz);
 	}
       else
 	{
-	  Error ("where_in_grid: Unknown coord_type %d\n", geo.coord_type);
+	  Error ("where_in_grid: Unknown coord_type %d\n", xdom[0].coord_type);
 	  exit (0);
 	}
 
@@ -709,7 +709,7 @@ vwind_xyz (p, v)
 
   rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
 
-  if (geo.coord_type == SPHERICAL)
+  if (xdom[0].coord_type == SPHERICAL)
     {				// put the velocity into cylindrical coordinates on the xz axis
       x = sqrt (vv[0] * vv[0] + vv[2] * vv[2]);	//v_r
       r = length (p->x);
@@ -1029,26 +1029,26 @@ get_random_location (n, icomp, x)
      double x[];		// Returned position
 {
 
-  if (geo.coord_type == CYLIND)
+  if (xdom[0].coord_type == CYLIND)
     {
       cylind_get_random_location (n, icomp, x);
     }
-  else if (geo.coord_type == RTHETA)
+  else if (xdom[0].coord_type == RTHETA)
     {
       rtheta_get_random_location (n, icomp, x);
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (xdom[0].coord_type == SPHERICAL)
     {
       spherical_get_random_location (n, icomp, x);
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (xdom[0].coord_type == CYLVAR)
     {
       cylvar_get_random_location (n, icomp, x);
     }
   else
     {
       Error ("get_random_location: Don't know this coord_type %d\n",
-	     geo.coord_type);
+	     xdom[0].coord_type);
       exit (0);
     }
 

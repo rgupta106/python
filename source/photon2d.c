@@ -332,19 +332,19 @@ return and record an error */
 
 /* Calculate the maximum distance the photon can travel in the cell */
 
-  if (geo.coord_type == CYLIND)
+  if (xdom[0].coord_type == CYLIND)
     {
       smax = cylind_ds_in_cell (p);	// maximum distance the photon can travel in a cell
     }
-  else if (geo.coord_type == RTHETA)
+  else if (xdom[0].coord_type == RTHETA)
     {
       smax = rtheta_ds_in_cell (p);
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (xdom[0].coord_type == SPHERICAL)
     {
       smax = spherical_ds_in_cell (p);
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (xdom[0].coord_type == CYLVAR)
     {
       smax = cylvar_ds_in_cell (p);
     }
@@ -352,7 +352,7 @@ return and record an error */
     {
       Error
 	("translate_in_wind: Don't know how to find ds_in_cell in this coord system %d\n",
-	 geo.coord_type);
+	 xdom[0].coord_type);
       exit (0);
     }
 

@@ -297,7 +297,7 @@ coord_fraction (ichoice, x, ii, frac, nelem)
 
   /* Jump to special routine if CYLVAR coords */
 
-  if (geo.coord_type == CYLVAR)
+  if (xdom[0].coord_type == CYLVAR)
     {
 
       n = cylvar_coord_fraction (ichoice, x, ii, frac, nelem);
@@ -329,17 +329,17 @@ coord_fraction (ichoice, x, ii, frac, nelem)
     }
 
   /* Now convert x to the appropriate coordinate system */
-  if (geo.coord_type == CYLIND)
+  if (xdom[0].coord_type == CYLIND)
     {
       r = sqrt (x[0] * x[0] + x[1] * x[1]);
       z = fabs (x[2]);
     }
-  else if (geo.coord_type == RTHETA)
+  else if (xdom[0].coord_type == RTHETA)
     {
       r = length (x);
       z = acos (fabs (x[2]) / r) * RADIAN;
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (xdom[0].coord_type == SPHERICAL)
     {
       r = length (x);
       z = 0;			// To avoid -O3 warning
@@ -348,11 +348,11 @@ coord_fraction (ichoice, x, ii, frac, nelem)
     {
       Error
 	("coord_fraction: Don't know how to handle this coordinate type %d\n",
-	 geo.coord_type);
+	 xdom[0].coord_type);
       exit (0);
     }
 
-  if (geo.coord_type == SPHERICAL)
+  if (xdom[0].coord_type == SPHERICAL)
     {				/* We are dealing with a 1d system */
       fraction (r, xx, NDIM, &ix, &dr, 0); //linear space
       ii[0] = ix;
@@ -541,7 +541,7 @@ int
 wind_n_to_ij (n, i, j)
      int n, *i, *j;
 {
-  if (geo.coord_type == SPHERICAL)
+  if (xdom[0].coord_type == SPHERICAL)
     {
       *i = n;
       *j = 0;
@@ -562,7 +562,7 @@ int
 wind_ij_to_n (i, j, n)
      int *n, i, j;
 {
-  if (geo.coord_type == SPHERICAL)
+  if (xdom[0].coord_type == SPHERICAL)
     {
       Error
 	("Warning: wind_ij_to_n being called for spherical coordinates %d %d\n",

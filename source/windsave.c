@@ -202,8 +202,8 @@ wind_read (filename)
 
 /* Now allocate space for the wind array */
 
-  ndim = geo.ndim;
-  mdim = geo.mdim;
+  ndim = xdom[0].ndim;
+  mdim = xdom[0].mdim;
   NDIM = ndim;
   MDIM = mdim;
   NDIM2 = ndim * mdim;
@@ -324,26 +324,26 @@ wind_complete (w)
      WindPtr w;
 {
 
-  if (geo.coord_type == SPHERICAL)
+  if (xdom[0].coord_type == SPHERICAL)
     {
       spherical_wind_complete (w);
     }
-  else if (geo.coord_type == CYLIND)
+  else if (xdom[0].coord_type == CYLIND)
     {
       cylind_wind_complete (w);
     }
-  else if (geo.coord_type == RTHETA)
+  else if (xdom[0].coord_type == RTHETA)
     {
       rtheta_wind_complete (w);
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (xdom[0].coord_type == CYLVAR)
     {
       cylvar_wind_complete (w);
     }
   else
     {
       Error ("wind_complete: Don't know how to complete coord_type %d\n",
-	     geo.coord_type);
+	     xdom[0].coord_type);
       exit (0);
     }
 

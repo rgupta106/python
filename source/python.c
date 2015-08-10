@@ -200,7 +200,9 @@ History:
 	1501 	JM moved some parallelization stuff to subroutines in para_update.c
 			functions are communicate_estimators_para, communicate_matom_estimators_para,
 			and gather_spectra_para
-	1502	Major reorganisation of input gathering and setup. See setup.c, #136 and #139
+	1502		Major reorganisation of input gathering and setup. See setup.c, #136 and #139
+	1508	ksl	Instroduction of the concept of domains to handle the disk and wind as separate
+			domains
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -352,9 +354,9 @@ main (argc, argv)
 
 /* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
 
-  NDIM = geo.ndim;
-  MDIM = geo.mdim;
-  NDIM2 = geo.ndim * geo.mdim;
+  NDIM = xdom[0].ndim;
+  MDIM = xdom[0].mdim;
+  NDIM2 = xdom[0].ndim * xdom[0].mdim;
 
 /* End of definition of wind arrays */
 
@@ -689,7 +691,7 @@ main (argc, argv)
   /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
   the cones are never defined for an rtheta grid if the model is restarted */
 
-  if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta wind cone if we are restarting
+  if (xdom[0].coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta wind cone if we are restarting
     {
       rtheta_make_cones(wmain);
     }
@@ -1682,9 +1684,9 @@ History:
 int
 init_geo ()
 {
-  geo.coord_type = 1;
-  geo.ndim = 30;
-  geo.mdim = 30;
+  xdom[0].coord_type = 1;
+  xdom[0].ndim = 30;
+  xdom[0].mdim = 30;
   geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
   geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
   geo.auger_ionization = 1;	//Default is on.
