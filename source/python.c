@@ -261,6 +261,7 @@ main (argc, argv)
   int my_rank;		// these two variables are used regardless of parallel mode
   int np_mpi;		// rank and number of processes, 0 and 1 in non-parallel
   int time_to_quit;
+  int input_int;
 
   int mkdir();
 
@@ -354,9 +355,9 @@ main (argc, argv)
 
 /* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
 
-  NDIM = xdom[0].ndim;
-  MDIM = xdom[0].mdim;
-  NDIM2 = xdom[0].ndim * xdom[0].mdim;
+  xdom[0].NDIM = xdom[0].ndim;
+  xdom[0].MDIM = xdom[0].mdim;
+  xdom[0].NDIM2 = xdom[0].ndim * xdom[0].mdim;
 
 /* End of definition of wind arrays */
 
@@ -391,8 +392,12 @@ main (argc, argv)
 
 
       rdint
-	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell)",
+	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
 	 &geo.wind_type);
+      if (geo.wind_type!=10) {
+	      strcat(xdom[ndomain].name,"Wind");
+	      ndomain++;
+      }
 
       if (geo.wind_type == 2)
 	{
@@ -599,6 +604,33 @@ main (argc, argv)
   rdint
 	("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
 	 &geo.disk_type);
+
+  /* ksl 1508 Add parameters for a disk atmosphere */
+  geo.disk_atmosphere=0;
+  xdom[ndomain].ndim=30;
+  xdom[ndomain].mdim=10;
+
+  rdint("disk.atmosphere(0=no,1=yes)",&geo.disk_atmosphere);
+  if (geo.disk_atmosphere!=0) {
+	  strcat(xdom[ndomain].name,"Disk Atmosphere");
+	  rdint  ("atmos.coord.system(1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
+	switch(input_int)
+	{
+		case 0: xdom[ndomain].coord_type = SPHERICAL; break;
+		case 1: xdom[ndomain].coord_type = CYLIND; break;
+		case 2: xdom[ndomain].coord_type = RTHETA; break;
+		case 3: xdom[ndomain].coord_type = CYLVAR; break;
+		default: Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
+0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
+}
+
+
+	  rdint ("atmos.dim.in.x_or_r.direction", &xdom[ndomain].ndim);
+	  rdint ("atmos.dim.in.z_or_theta.direction", &xdom[ndomain].mdim);
+	  ndomain++;
+  }
+
+
 
 
   /* Determine what radiation sources there are.  
@@ -1684,6 +1716,7 @@ History:
 int
 init_geo ()
 {
+	ndomain=0;   //XXX it is possible this needs to be part of geo, so that we can read this back in windsave
   xdom[0].coord_type = 1;
   xdom[0].ndim = 30;
   xdom[0].mdim = 30;
@@ -1699,7 +1732,7 @@ init_geo ()
     = geo.bl_ion_spectype = geo.bl_spectype = SPECTYPE_BB;
   geo.agn_ion_spectype = SPECTYPE_POW;	// 130605 - nsh - moved from python.c
 
-  geo.log_linear = 0;		/* Set intervals to be logarithmic */
+  xdom[0].log_linear = 0;		/* Set intervals to be logarithmic */
 
   geo.rmax = 1e11;
   geo.rmax_sq = geo.rmax * geo.rmax;

@@ -82,7 +82,7 @@ wind_luminosity (f1, f2)
 
 
   lum = lum_lines = lum_fb = lum_ff = lum_comp = lum_dr = lum_di = lum_adiab = heat_adiab = 0;	//1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
-  for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < xdom[0].NDIM2; n++)
     {
 
       if (wmain[n].vol > 0.0)

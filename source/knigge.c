@@ -144,20 +144,12 @@ in units of WD radii */
 	geo.diskrad - (zdisk (geo.diskrad) * tan (geo.wind_thetamax));
     }
 
-  /* Some changes were made here to make this more general by Nick */
-//OLD70d  geo.xlog_scale = geo.rstar/10.0;
-//geo.zlog_scale = 1e8;
-//OLD70d  geo.zlog_scale = geo.rstar/10.0;
-/* 70d - ksl - I changed the scaling to something that produced more cells
- * in the wind, at the cost of slightly less spatial resolution at the inner
- * edge of the wind
- */
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = geo.rstar;
-      geo.zlog_scale = geo.rstar;
+      xdom[0].xlog_scale = geo.rstar;
+      xdom[0].zlog_scale = geo.rstar;
     }
 
 

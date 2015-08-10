@@ -1125,7 +1125,7 @@ wind_rad_summary (w, filename, mode)
 
   fprintf (fptr,
 	   "n       x         z         j       ntot    ave_freq    T_rad      W       Lum     Lum_abs\n");
-  for (n = 0; n < NDIM2 - 1; n++)
+  for (n = 0; n < xdom[0].NDIM2 - 1; n++)
     {
       nplasma = w[n].nplasma;
       fprintf (fptr,

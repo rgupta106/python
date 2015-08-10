@@ -110,19 +110,16 @@ get_elvis_wind_params ()
 
   geo.wind_rmin = geo.rstar;
   geo.wind_rmax = geo.rmax;
-//Old  geo.wind_rho_min = geo.sv_rmin;
-//Old  geo.wind_rho_max = geo.sv_rmax;
   geo.wind_rho_min = geo.sv_rmin - (geo.elvis_offset * tan (geo.sv_thetamin));
   geo.wind_rho_max = geo.sv_rmax - (geo.elvis_offset * tan (geo.sv_thetamin));
   geo.wind_thetamin = geo.sv_thetamin;
   geo.wind_thetamax = geo.sv_thetamax;
-//OLD  geo.xlog_scale = geo.sv_rmin + (geo.elvis_offset * tan (geo.sv_thetamin));
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = geo.sv_rmin;
-      geo.zlog_scale = 1e15;	/* Big number - for AGN */
+      xdom[0].xlog_scale = geo.sv_rmin;
+      xdom[0].zlog_scale = 1e15;	/* Big number - for AGN */
     }
 
 /*Now calculate the normalization factor for the wind*/

@@ -8,7 +8,7 @@
 
 /* Notes on spherical coordinates
 
-   In spherical coordinates, we set NDIM = to whatever and MDIM = 1.  
+   In spherical coordinates, we set xdom[0].NDIM = to whatever and xdom[0].MDIM = 1.  
 
    Some of the variables in the Wind_ptr array, like the divergence
    have to be calculated at a certain place.  Logically, one would
@@ -94,7 +94,7 @@ Returns:
  
 Description:
 
-	In spherical coordinates w runs from 0 to NDIM.  Note that the 
+	In spherical coordinates w runs from 0 to xdom[0].NDIM.  Note that the 
 	centers of the grid cells are defined in the xz plane at a 45 
 	degree angle.  This was done so that one would be in a plausible
 	region of a biconical wind.
@@ -115,26 +115,26 @@ spherical_make_grid (w)
   double dr, dlogr;
   int n;
 
-  for (n = 0; n < NDIM; n++)
+  for (n = 0; n < xdom[0].NDIM; n++)
     {
       {
 
 	/*Define the grid points */
-	if (geo.log_linear == 1)
+	if (xdom[0].log_linear == 1)
 	  {			// linear intervals
 
-	    dr = (geo.rmax - geo.rstar) / (NDIM - 3);
+	    dr = (geo.rmax - geo.rstar) / (xdom[0].NDIM - 3);
 	    w[n].r = geo.rstar + n * dr;
 	    w[n].rcen = w[n].r + 0.5 * dr;
 	  }
 	else
 	  {			//logarithmic intervals
-	    dlogr = (log10 (geo.rmax / geo.rstar)) / (NDIM - 3);
+	    dlogr = (log10 (geo.rmax / geo.rstar)) / (xdom[0].NDIM - 3);
 	    w[n].r = geo.rstar * pow (10., dlogr * (n - 1));
 	    w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (n)) +
 					   pow (10., dlogr * (n - 1)));
 	    Log ("OLD W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
-	    dlogr = (log10 (geo.rmax / geo.wind_rmin)) / (NDIM - 3);
+	    dlogr = (log10 (geo.rmax / geo.wind_rmin)) / (xdom[0].NDIM - 3);
 	    w[n].r = geo.wind_rmin * pow (10., dlogr * (n - 1));
 	    w[n].rcen = 0.5 * geo.wind_rmin * (pow (10., dlogr * (n)) +
 					       pow (10., dlogr * (n - 1)));
@@ -201,15 +201,15 @@ spherical_wind_complete (w)
    * a "rectangular" grid of points.  Note that rectangular 
    * does not mean equally spaced. */
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < xdom[0].NDIM; i++)
     wind_x[i] = w[i].r;
-  for (i = 0; i < NDIM - 1; i++)
+  for (i = 0; i < xdom[0].NDIM - 1; i++)
     wind_midx[i] = w[i].rcen;
   /* Add something plausible for the edges */
   /* ?? It is bizarre that one needs to do anything like this ???. 
-   * wind should be defined to include NDIM -1 */
-  wind_midx[NDIM - 1] = 2. * wind_x[NDIM - 1] - wind_midx[NDIM - 2];
-  wind_midz[MDIM - 1] = 2. * wind_z[MDIM - 1] - wind_midz[MDIM - 2];
+   * wind should be defined to include xdom[0].NDIM -1 */
+  wind_midx[xdom[0].NDIM - 1] = 2. * wind_x[xdom[0].NDIM - 1] - wind_midx[xdom[0].NDIM - 2];
+  wind_midz[xdom[0].MDIM - 1] = 2. * wind_z[xdom[0].MDIM - 1] - wind_midz[xdom[0].MDIM - 2];
 
   return (0);
 }
@@ -270,7 +270,7 @@ spherical_volumes (w, icomp)
   thetamin = 0.0;
   thetamax = 0.5 * PI;
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < xdom[0].NDIM; i++)
     {
       {
 	n = i;
@@ -279,13 +279,13 @@ spherical_volumes (w, icomp)
 
 	w[n].vol = 4. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin);
 
-	if (i == NDIM - 1)
+	if (i == xdom[0].NDIM - 1)
 	  {
 	    fraction = 0.0;	/* Force outside edge volues to zero */
 	    jj = 0;
 	    kk = RESOLUTION;
 	  }
-	else if (i == NDIM - 2)
+	else if (i == xdom[0].NDIM - 2)
 	  {
 	    fraction = 0.0;	/* Force outside edge volues to zero */
 	    jj = 0;
@@ -351,7 +351,7 @@ spherical_volumes (w, icomp)
  Returns:
  	where_in_grid normally  returns the cell number associated with
  		a position.  If the position is in the grid this will be a positive
- 		integer < NDIM*MDIM.
+ 		integer < xdom[0].NDIM*xdom[0].MDIM.
  	x is inside the grid        -1
 	x is outside the grid       -2
  Description:	
@@ -384,7 +384,7 @@ spherical_where_in_grid (x)
   r = length (x);
 
   /* Check to see if x is outside the region of the calculation */
-  if (r > wind_x[NDIM - 1])
+  if (r > wind_x[xdom[0].NDIM - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -393,7 +393,7 @@ spherical_where_in_grid (x)
       return (-1);		/*x is inside grid */
     }
 
-  fraction (r, wind_x, NDIM, &n, &f, 0);
+  fraction (r, wind_x, xdom[0].NDIM, &n, &f, 0);
 
   return (n);
 }
@@ -512,7 +512,7 @@ spherical_extend_density (w)
      cell that is just inside (or outside) the wind. 
    */
 
-  for (j = 0; j < NDIM2 - 1; j++)
+  for (j = 0; j < xdom[0].NDIM2 - 1; j++)
     {
       n = j;
       if (w[n].vol == 0)	// Then the grid point is not in the wind
@@ -554,7 +554,7 @@ Returns:
  
 Description:
 
-	In spherical coordinates w runs from 0 to NDIM.  Note that the 
+	In spherical coordinates w runs from 0 to xdom[0].NDIM.  Note that the 
 	centers of the grid cells are defined in the xz plane at a 45 
 	degree angle.  This was done so that one would be in a plausible
 	region of a biconical wind.
@@ -596,7 +596,7 @@ shell_make_grid (w)
      in the hopes this will be a reasonable portion of the wind in
      a biconical flow.
    */
-  for (n = 0; n < NDIM; n++)
+  for (n = 0; n < xdom[0].NDIM; n++)
     {
       Log ("Cell %i:  inner edge = %2.20e, centre = %2.20e\n", n, w[n].r,
 	   w[n].rcen);

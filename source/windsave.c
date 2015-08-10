@@ -72,7 +72,7 @@ wind_save (filename)
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
-  n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
+  n += fwrite (wmain, sizeof (wind_dummy), xdom[0].NDIM2, fptr);
   n += fwrite (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
 
 /* NSH 1407 - The following loop writes out the variable length arrays
@@ -202,15 +202,10 @@ wind_read (filename)
 
 /* Now allocate space for the wind array */
 
-  ndim = xdom[0].ndim;
-  mdim = xdom[0].mdim;
-  NDIM = ndim;
-  MDIM = mdim;
-  NDIM2 = ndim * mdim;
   NPLASMA = geo.nplasma;
 
-  calloc_wind (NDIM2);
-  n += fread (wmain, sizeof (wind_dummy), NDIM2, fptr);
+  calloc_wind (xdom[0].NDIM2);
+  n += fread (wmain, sizeof (wind_dummy), xdom[0].NDIM2, fptr);
 
   calloc_plasma (NPLASMA);
 

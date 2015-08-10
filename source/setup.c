@@ -283,9 +283,9 @@ if (geo.wind_type != 2)
     if (modes.adjust_grid)
       {
         Log("You have opted to adjust the grid scale lengths\n");
-        rddoub ("geo.xlog_scale", &geo.xlog_scale);
+        rddoub ("geo.xlog_scale", &xdom[0].xlog_scale);
         if (xdom[0].coord_type)
-          rddoub ("geo.zlog_scale", &geo.zlog_scale);
+          rddoub ("geo.zlog_scale", &xdom[0].zlog_scale);
       }
   }
 

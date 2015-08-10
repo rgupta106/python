@@ -218,7 +218,7 @@ dvds_ave ()
       optr = fopen (filename, "w");	//TEST
     }
 
-  for (icell = 0; icell < NDIM2; icell++)
+  for (icell = 0; icell < xdom[0].NDIM2; icell++)
     {
 
       dvds_max = 0.0;		// Set dvds_max to zero for the cell.

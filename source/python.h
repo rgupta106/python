@@ -18,9 +18,7 @@ int verbosity;			/* verbosity level. 0 low, 10 is high */
 /* In python_43 the assignment of the WindPtr size has been moved from a fixed
 value determined by values in python.h to a values which are adjustable from
 within python */
-int ndim;			// Define the fundamental dimension of the grid
-int mdim;
-int NDIM, MDIM, NDIM2;
+
 int NPLASMA;			//The number of cells with non-zero volume or the size of plasma structure
 
 char basename[132];		// The root of the parameter file name being used by python
@@ -122,6 +120,8 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
  * wind and the disk
  */
 
+// This is intialized in init_goe, but it my need to be in geo in order to be able to read
+// everything back
 int ndomain;  /*The number of domains in a model*/
 
 enum coord_type_enum
@@ -139,6 +139,9 @@ struct domain
 	int ndim,mdim,ndim2;
 	int nstart;  //the beginning location in wmain of this component
   	enum coord_type_enum coord_type;
+  	int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
+  	double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
+					   will be located at xlog_scale,zlog_scale */
 
 }
 xdom[10];   // One structure for each domain
@@ -186,14 +189,14 @@ struct geometry
 				   3--> Disk illumination is treated in terms of an analytic approximation
 				   04Aug ksl -- this parameter added for Python52
 				 */
+  int disk_atmosphere;           /* 0 --> no
+				    1 --> yes
+				 */
   int disk_tprofile;
   double disk_mdot;		/* mdot of  DISK */
   double diskrad, diskrad_sq;
   double disk_z0, disk_z1;	/* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
   int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file */
-  int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
-  double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
-					   will be located at xlog_scale,zlog_scale */
   int star_radiation, disk_radiation;	/* 1 means consider radiation from star, disk,  bl, and/or wind */
   int bl_radiation, wind_radiation, agn_radiation;
   int matom_radiation;		/* Added by SS Jun 2004: for use in macro atom computations of detailed spectra

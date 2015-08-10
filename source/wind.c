@@ -201,7 +201,7 @@ wind_check (www, n)
   if (n < 0)
     {
       istart = 0;
-      istop = NDIM2;
+      istop = xdom[0].NDIM2;
     }
   else
     {

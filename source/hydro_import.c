@@ -162,8 +162,8 @@ Log ("geo.wind_rhomax=%e\n",geo.wind_rho_max);
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = 0.3 * geo.rstar;
-      geo.zlog_scale = 0.3 * geo.rstar;
+      xdom[0].xlog_scale = 0.3 * geo.rstar;
+      xdom[0].zlog_scale = 0.3 * geo.rstar;
     }
     
   return (0);
@@ -294,14 +294,14 @@ get_hydro ()
 	ihydro_theta=ithetamax;
 	geo.wind_thetamax=90. / RADIAN;
 	hydro_thetamax=90.0/RADIAN;
-	MDIM = xdom[0].mdim = ihydro_theta+1;
+	xdom[0].MDIM = xdom[0].mdim = ihydro_theta+1;
 	}
   else
 	{	
  	Log ("HYDRO j_hydro_thetamax=%i, bracketing cells have theta = %f and %f\n",j_hydro_thetamax,hydro_theta_cent[j_hydro_thetamax]*RADIAN,hydro_theta_cent[j_hydro_thetamax+1]*RADIAN); 
 	ihydro_theta=j_hydro_thetamax;
 	geo.wind_thetamax=hydro_thetamax;
-	MDIM = xdom[0].mdim = ihydro_theta+2;
+	xdom[0].MDIM = xdom[0].mdim = ihydro_theta+2;
 	}
 
 
@@ -323,7 +323,7 @@ get_hydro ()
 /* Set a couple of last tags*/
  
 	xdom[0].coord_type=RTHETA; //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
-	NDIM = xdom[0].ndim = ihydro_r+3; //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
+	xdom[0].NDIM = xdom[0].ndim = ihydro_r+3; //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
 
 
 
@@ -726,9 +726,9 @@ rtheta_make_hydro_grid (w)
   
 
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < xdom[0].NDIM; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < xdom[0].MDIM; j++)
 	{
  	  wind_ij_to_n (i, j, &n);
 		w[n].inwind = W_ALL_INWIND;	
@@ -790,13 +790,13 @@ rtheta_make_hydro_grid (w)
 	}
     }
 /*
-for (i = 0; i < NDIM; i++)
+for (i = 0; i < xdom[0].NDIM; i++)
 	{
 	wind_ij_to_n (i, 0, &n);
 	printf ("i=%i, n=%i, r=%e, rcen=%e\n",i,n,w[n].r,w[n].rcen);
 	}
 
-for (i = 0; i < MDIM; i++)
+for (i = 0; i < xdom[0].MDIM; i++)
 	{
 	wind_ij_to_n (0, i, &n);
 	printf ("j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
@@ -807,7 +807,7 @@ for (i = 0; i < MDIM; i++)
 
 
 /*
-  cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), MDIM);
+  cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), xdom[0].MDIM);
   if (cones_rtheta == NULL)
     {
       Error
@@ -817,7 +817,7 @@ for (i = 0; i < MDIM; i++)
     }
 
 
-  for (n = 0; n < MDIM; n++)
+  for (n = 0; n < xdom[0].MDIM; n++)
     {
       cones_rtheta[n].z = 0.0;
       cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);	// New definition
@@ -870,9 +870,9 @@ rtheta_hydro_volumes (w)
   double rmin, rmax, thetamin, thetamax;
 
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < xdom[0].NDIM; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < xdom[0].MDIM; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 	  if (w[n].inwind == W_ALL_INWIND)

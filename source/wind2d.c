@@ -98,17 +98,17 @@ define_wind ()
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
-     to propagate.  This is the reason we divide by NDIM-2 here, rather than NDIM-1 */
+     to propagate.  This is the reason we divide by xdom[0].NDIM-2 here, rather than xdom[0].NDIM-1 */
 
-  NDIM = ndim = xdom[0].ndim;
-  MDIM = mdim = xdom[0].mdim;
-  NDIM2 = NDIM * MDIM;
-  calloc_wind (NDIM2);
+  xdom[0].NDIM = xdom[0].ndim;
+  xdom[0].MDIM = xdom[0].mdim;
+  xdom[0].NDIM2 = xdom[0].NDIM * xdom[0].MDIM;
+  calloc_wind (xdom[0].NDIM2);
   w = wmain;
 
   /* initialize inwind to a known state */
 
-  for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < xdom[0].NDIM2; n++)
     {
       w[n].inwind = W_NOT_INWIND;
     }
@@ -149,7 +149,7 @@ define_wind ()
       Error ("define_wind: Don't know how to make coordinate type %d\n",
 	     xdom[0].coord_type);
     }
-  for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < xdom[0].NDIM2; n++)
     {
       /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
        * made in the program to allow more that one coordinate system in python 
@@ -247,7 +247,7 @@ recreated when a windfile is read into the program
 
   n_vol = n_inwind = n_part = 0;
   n_comp = n_comp_part = 0;
-  for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < xdom[0].NDIM2; n++)
     {
       if (w[n].vol > 0.0)
 	n_vol++;
@@ -263,7 +263,7 @@ recreated when a windfile is read into the program
 
   Log
     ("wind2d: %3d cells of which %d are in inwind, %d partially in_wind, & %d with pos. vol\n",
-     NDIM2, n_inwind, n_part, n_vol);
+     xdom[0].NDIM2, n_inwind, n_part, n_vol);
 
   if (geo.compton_torus)
     {
@@ -277,7 +277,7 @@ recreated when a windfile is read into the program
 */
   if (xdom[0].coord_type != SPHERICAL)
     {
-      for (n = 0; n < NDIM2; n++)
+      for (n = 0; n < xdom[0].NDIM2; n++)
 	{
 	  n_inwind = check_corners_inwind (n, 0);
 	  if (w[n].vol == 0 && n_inwind > 0)
@@ -306,9 +306,9 @@ recreated when a windfile is read into the program
     {
       NPLASMA = n_vol;
     }
-  else				/* Force NPLASMA to equal NDIM2 (for diagnostic reasons) */
+  else				/* Force NPLASMA to equal xdom[0].NDIM2 (for diagnostic reasons) */
     {
-      NPLASMA = NDIM2;
+      NPLASMA = xdom[0].NDIM2;
     }
 
   calloc_plasma (NPLASMA);
@@ -488,20 +488,20 @@ be optional which variables beyond here are moved to structures othere than Wind
     {
       mdotwind = 0;
       mdotbase = 0;
-      for (i = 0; i < NDIM - 1; i++)
+      for (i = 0; i < xdom[0].NDIM - 1; i++)
 	{
-	  n = i * MDIM + (MDIM / 2);
+	  n = i * xdom[0].MDIM + (xdom[0].MDIM / 2);
 // rr is router * router - rinner *rinner for this shell
 	  rr =
-	    w[n + MDIM].x[0] * w[n + MDIM].x[0] + w[n +
-						    MDIM].x[1] * w[n +
-								   MDIM].x[1]
+	    w[n + xdom[0].MDIM].x[0] * w[n + xdom[0].MDIM].x[0] + w[n +
+						    xdom[0].MDIM].x[1] * w[n +
+								   xdom[0].MDIM].x[1]
 	    - (w[n].x[0] * w[n].x[0] + w[n].x[1] * w[n].x[1]);
-	  if (w[i * MDIM].inwind == W_ALL_INWIND)
+	  if (w[i * xdom[0].MDIM].inwind == W_ALL_INWIND)
 	    {
-	      nplasma = w[i * MDIM].nplasma;
+	      nplasma = w[i * xdom[0].MDIM].nplasma;
 	      mdotbase +=
-		plasmamain[nplasma].rho * PI * rr * w[i * MDIM].v[2];
+		plasmamain[nplasma].rho * PI * rr * w[i * xdom[0].MDIM].v[2];
 	    }
 	  if (w[n].inwind == W_ALL_INWIND)
 	    {
@@ -537,7 +537,7 @@ be optional which variables beyond here are moved to structures othere than Wind
  Returns:
  	where_in_grid normally  returns the cell number associated with
  		a postion.  If the photon is in the grid this will be a positive
- 		integer < NDIM*MDIM.
+ 		integer < xdom[0].NDIM*xdom[0].MDIM.
  	photon is inside the grid        -1
 	photon is outside the grid       -2
  Description:	
@@ -820,7 +820,7 @@ wind_div_v (w)
   double div, delta;
   double length ();
   double xxx[3];
-  for (icell = 0; icell < NDIM2; icell++)
+  for (icell = 0; icell < xdom[0].NDIM2; icell++)
     {
       /* Find the center of the cell */
 
@@ -1115,15 +1115,15 @@ check_corners_inwind (n, icomp)
   wind_n_to_ij (n, &i, &j);
 
   n_inwind = 0;
-  if (i < (NDIM - 2) && j < (MDIM - 2))
+  if (i < (xdom[0].NDIM - 2) && j < (xdom[0].MDIM - 2))
     {
       if (where_in_wind (wmain[n].x) == icomp)
 	n_inwind++;
       if (where_in_wind (wmain[n + 1].x) == icomp)
 	n_inwind++;
-      if (where_in_wind (wmain[n + MDIM].x) == icomp)
+      if (where_in_wind (wmain[n + xdom[0].MDIM].x) == icomp)
 	n_inwind++;
-      if (where_in_wind (wmain[n + MDIM + 1].x) == icomp)
+      if (where_in_wind (wmain[n + xdom[0].MDIM + 1].x) == icomp)
 	n_inwind++;
     }
   return (n_inwind);
