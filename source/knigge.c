@@ -294,7 +294,8 @@ the poloidal velocity at the inner edge of the wind. It is there for continuity 
     v_escape = sqrt (2. * G * geo.mstar / rzero);
 
   vzero = kn_vzero (rzero);
-  vzero *= geo.kn_v_zero;	/*NSH 19/4/11 Multiply sound speed by new multiplyer to allow faster velocity at base of wind */
+  vzero *= geo.kn_v_zero;	/*NSH 19/4/11 Multiply sound speed by new multiplyer 
+				  to allow faster velocity at base of wind */
 
 /* 578 -- 06oct -- ksl -- The next lines are modified to allow one to create a SV style
 velocity law if kn_v_infinity is less than 0 */
@@ -424,7 +425,7 @@ kn_rho (x)
 /***********************************************************
 	Space Telescope Science Institute
 
- Synopsis:
+Synopsis:
 	Calculate the sound speed (launch speed) of the wind at r
 Arguments:		
  
@@ -435,6 +436,9 @@ Description:
 	
 		
 Notes:
+	This is also now used for the sound spped in the disk
+	atmosphere calculation.  It is not obvious why we are
+	not calculating this from first principles (ksl 1508)
 
 History:
  	01mar      ksl	Coding began.

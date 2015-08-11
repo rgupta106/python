@@ -613,6 +613,7 @@ main (argc, argv)
   rdint("disk.atmosphere(0=no,1=yes)",&geo.disk_atmosphere);
   if (geo.disk_atmosphere!=0) {
 	  strcat(xdom[ndomain].name,"Disk Atmosphere");
+	  input_int=1;
 	  rdint  ("atmos.coord.system(1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
 	switch(input_int)
 	{
@@ -1019,6 +1020,8 @@ main (argc, argv)
     }
 
   /* INPUTS ARE FINALLY COMPLETE */
+
+geo.ndomain=ndomain;  // Store ndomain in geo so that it can be saved
 
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
@@ -1716,7 +1719,9 @@ History:
 int
 init_geo ()
 {
-	ndomain=0;   //XXX it is possible this needs to be part of geo, so that we can read this back in windsave
+	geo.ndomain=ndomain=0;   /*ndomain is a convenince variable so we do not always
+				   need to write geo.ndomain but it should nearly always
+				   be set to the same value as geo.ndomain */
   xdom[0].coord_type = 1;
   xdom[0].ndim = 30;
   xdom[0].mdim = 30;

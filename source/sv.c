@@ -270,18 +270,13 @@ sv_rho (x)
 {
   double r, rzero, theta;
   double ldist;
-//  double sv_find_wind_rzero ();
-//  double sv_theta_wind ();
   double dmdot_da;
   double dtheta_drzero, dr_drzero;
 
   double v[3], rho;
-//  double sv_velocity ();
-//  double sv_find_wind_rzero (), sv_theta_wind ();
   struct photon ptest;
   double xtest[3];
   double s;
-//  double ds_to_disk ();
 
 
   sv_velocity (x, v);

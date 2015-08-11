@@ -295,6 +295,8 @@ wind_read (filename)
 
   wind_complete (wmain);
 
+  ndomain=geo.ndomain;  // Set value of convenience variable ndomain
+
   Log ("Read geometry and wind structures from windsavefile %s\n", filename);
 
   return (n);

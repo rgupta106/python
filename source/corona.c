@@ -155,8 +155,9 @@ corona_velocity (x, v)
  Synopsis:
 	double corona_rho(x) calculates the density of a corona at a position x
 Arguments:		
-	double x[]		the postion where for the which one desires the denisty
+	double x[]	the position where one desires the density
 Returns:
+
 	The density at x is returned in gram/cm**3
 	
 Description:

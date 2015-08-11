@@ -122,7 +122,6 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 
 // This is intialized in init_goe, but it my need to be in geo in order to be able to read
 // everything back
-int ndomain;  /*The number of domains in a model*/
 
 enum coord_type_enum
   	{	SPHERICAL 	=0,
@@ -146,6 +145,14 @@ struct domain
 }
 xdom[10];   // One structure for each domain
 
+int ndomain;  /* This is a convenience variable and one should be careful that ndomain and geo.ndomain
+		 are identical once all the inputs are read in, whehter from the command line
+		 or from an old wind model */
+
+/* the geometry structure contains information that applies to all domains or alternatimve
+ a single domain.  Information that is domain specific should be placed directly in the domain
+ structure.  ksl
+ */
 
 struct geometry
 {
@@ -158,6 +165,7 @@ struct geometry
 /* Begin description of the actual geometery */
   // XXX  This needs to be removed from geometry
 //  enum coord_type_enum coord_type;
+int ndomain;  /*The number of domains in a model*/
 
 //  int ndim, mdim;	
 /* The type of geometry and dimensionality of the wind array. 
