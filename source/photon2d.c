@@ -49,10 +49,13 @@ translate (w, pp, tau_scat, tau, nres)
      int *nres;
 {
   int istat;
+  int ndom;
+
+  ndom=w[0].ndomain;
 
 
 //Old 70b  if (where_in_wind (pp->x) != 0)
-  if (where_in_wind (pp->x) < 0)
+  if (where_in_wind (ndom, pp->x) < 0)
     {
       istat = translate_in_space (pp);
     }

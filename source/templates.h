@@ -63,15 +63,16 @@ int vwind_xyz(PhotPtr p, double v[]);
 int wind_div_v(WindPtr w);
 double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);
-int get_random_location(int n, int icomp, double x[]);
+int get_random_location(int ndom, int n, int icomp, double x[]);
 int zero_scatters(void);
-int check_corners_inwind(int n, int icomp);
+int check_corners_inwind(int ndom, int n, int icomp);
 /* wind.c */
-int where_in_wind(double x[]);
+int where_in_wind(int ndom, double x[]);
 int wind_check(WindPtr www, int n);
 double model_velocity(double x[], double v[]);
 int model_vgrad(double x[], double v_grad[][3]);
 double model_rho(double x[]);
+int what_domain(double x[]);
 /* vector.c */
 double dot(double a[], double b[]);
 double length(double a[]);
@@ -294,8 +295,8 @@ int fraction(double value, double array[], int npts, int *ival, double *f, int m
 int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 int coord_fraction(int ichoice, double x[], int ii[], double frac[], int *nelem);
 int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
-int wind_n_to_ij(int n, int *i, int *j);
-int wind_ij_to_n(int i, int j, int *n);
+int wind_n_to_ij(int nd, int n, int *i, int *j);
+int wind_ij_to_n(int ndom, int i, int j, int *n);
 /* density.c */
 double get_ion_density(double x[], int nion);
 /* detail.c */
@@ -360,7 +361,7 @@ int cylind_volumes(WindPtr w, int icomp);
 int cylind_where_in_grid(double x[]);
 int cylind_get_random_location(int n, int icomp, double x[]);
 int cylind_extend_density(WindPtr w);
-int cylind_is_cell_in_wind(int n, int icomp);
+int cylind_is_cell_in_wind(int ndom, int n, int icomp);
 /* rtheta.c */
 double rtheta_ds_in_cell(PhotPtr p);
 int rtheta_make_grid(WindPtr w);
@@ -370,7 +371,7 @@ int rtheta_volumes(WindPtr w, int icomp);
 int rtheta_where_in_grid(double x[]);
 int rtheta_get_random_location(int n, int icomp, double x[]);
 int rtheta_extend_density(WindPtr w);
-int rtheta_is_cell_in_wind(int n, int icomp);
+int rtheta_is_cell_in_wind(int ndom, int n, int icomp);
 /* spherical.c */
 double spherical_ds_in_cell(PhotPtr p);
 int spherical_make_grid(WindPtr w);
@@ -394,7 +395,7 @@ int bilin(double x[], double x00[], double x01[], double x10[], double x11[], do
 int xquadratic(double a, double b, double c, double r[]);
 /* gridwind.c */
 int create_maps(int ichoice);
-int calloc_wind(int nelem);
+int calloc_wind(WindPtr *w, int nelem);
 int calloc_plasma(int nelem);
 int check_plasma(PlasmaPtr xplasma, char message[]);
 int calloc_macro(int nelem);
@@ -505,6 +506,9 @@ int wind_paths_single_evaluate(Wind_Paths_Ptr paths);
 int wind_paths_evaluate(WindPtr wind);
 int wind_paths_point_index(int i, int j, int k, int i_top);
 int wind_paths_output(WindPtr wind, char c_file_in[]);
+/* disk_atmos.c */
+double disk_atmos_velocity(double x[], double v[]);
+double disk_atmos_rho(double x[]);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

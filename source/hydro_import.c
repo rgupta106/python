@@ -722,6 +722,9 @@ rtheta_make_hydro_grid (w)
 {
   double theta, thetacen, dtheta;
   int i, j, n;
+  int ndom;
+
+  ndom=w[n].ndomain;
 
   
 
@@ -730,7 +733,7 @@ rtheta_make_hydro_grid (w)
     {
       for (j = 0; j < zdom[0].MDIM; j++)
 	{
- 	  wind_ij_to_n (i, j, &n);
+ 	  wind_ij_to_n (ndom, i, j, &n);
 		w[n].inwind = W_ALL_INWIND;	
 	  if (i == 0)  // The inner edge of the grid should be geo.rstar
 		{
@@ -852,6 +855,7 @@ Description:
 
 History:
 	13jun	nsh	76 -- Coded and debugged.
+	15aug	ksl	Small change to accept multiple domains
 
 
 **************************************************************/
@@ -862,6 +866,9 @@ rtheta_hydro_volumes (w)
      WindPtr w;
 {
   int i, j, n;
+  int ndom;
+
+  ndom=w[0].ndomain;
 
 
 
@@ -874,7 +881,7 @@ rtheta_hydro_volumes (w)
     {
       for (j = 0; j < zdom[0].MDIM; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (ndom, i, j, &n);
 	  if (w[n].inwind == W_ALL_INWIND)
 	    {
 

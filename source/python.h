@@ -149,6 +149,47 @@ enum coord_type_enum
 
 #define MaxDom			10
 
+/* Next define structures that pertain to possilbe region geometries
+ 
+   These definitions had to be moved up in python.h because they need to be defined 
+   prior to defining the domains, which must contain these structures in the new
+   schema  ksl 15aug
+*/
+
+typedef struct plane /*SWM 10-10-14 - Switched to TypeDef */
+{
+  double x[3];			/* A position included in the plane (usally the "center" */
+  double lmn[3];		/* A unit vector perpendicular to the plane (usually in the "positive" direction */
+} plane_dummy, *PlanePtr;
+plane_dummy plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
+					   primary to the seconday */
+
+
+/* Note that since we are interested in biconical flows, our definition of a cone is not exactly
+ * what one might guess.  The cone is defined in the positive z direction but reflected through 
+ * the xy plane.  
+ * 56d -- Beginning with 56d, ksl has switched to a new definition of cones, that is intended to
+ * make it possible to use ds_to_cone easier as part of different coordinate systems.  The new definition
+ * is based on the intersection of the cone with the z axis rather than the intersection with
+ * the disk plane.  At present both definitions are used in the program and therefore both shold
+ * be defined.  Once the new definition is promulgated through the entire program, and verified
+ * the old definitions can be elimiated.  05jul -- ksl
+ */
+
+typedef struct cone
+{
+  double z;			/* The place where the cone intersects the z axis (used after 56d) */
+  double dzdr;			/* the slope (used after 56d) */
+}
+cone_dummy, *ConePtr;
+
+ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods */
+
+struct cone windcone[2];	/* The cones that define the boundary of winds like SV or kwd */
+
+/* End of structures which are used to define boundaries to the emission regions */
+
+#define NDIM_MAX 500                // maximum size of the grid in each dimension
 
 struct domain
 {
@@ -162,14 +203,81 @@ struct domain
   	double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
 					   will be located at xlog_scale,zlog_scale */
 
+	/* The next few structures define the boundaries of an emission region */
+	struct cone windcone[2];    /* The cones that define the boundary of winds like SV or kwd */
+	struct plane windplane[2];   /* Plaanes which define the top and bootom of a layer */
+
+double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
+double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */
+
+/* Next two lines are for cyl_var coordinates.  They are used in locating the appropriate 
+ * locating the appropriate cell, for example by cylvar_where_in_grid
+ */
+
+double wind_z_var[NDIM_MAX][NDIM_MAX];
+double wind_midz_var[NDIM_MAX][NDIM_MAX];
+
+
+/* Since in principle we can mix and match arbitrarily the next parameters now have to be part of the domain structure */
+
+  /* Generic parameters for the wind */
+  double wind_mdot, stellar_wind_mdot;	/* Mass loss rate in disk and stellar wind */
+  double wind_rmin, wind_rmax;	/*Spherical extent of the wind */
+  double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
+  double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
+
+  /* Parameters defining Shlossman & Vitello Wind */
+  double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
+  double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;	/* parameters defining the goemetry of the wind */
+  double sv_v_zero;		/* velocity at base of wind */
+  double sv_r_scale, sv_alpha;	/* the scale length and power law exponent for the velocity law */
+  double sv_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
+
+  /* Paramater for the Elvis AGN wind - closely based on SV */
+  double elvis_offset;		/*This is a vertical offset for a region where the
+				   wind rises vertically from the disk */
+
+  /* Parameters defining Knigge Wind */
+  double kn_dratio;		/* parameter describing collimation of wind */
+  double kn_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
+//    double kn_rmin, kn_rmax, kn_thetamin, kn_thetamax, kn_gamma;      /* parameters defining the goemetry of the wind */
+//    double kn_v_zero;         /* velocity at base of wind */
+  double kn_r_scale, kn_alpha;	/* the scale length and power law exponent for the velocity law */
+  double kn_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
+  double kn_v_zero;		/* NSH 19/04/11 - Added in as the multiple of the sound speed to use as the initial velocity */
+
+  /* Parameters describing Castor and Larmors spherical wind */
+  double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponent */
+  double cl_rmin, cl_rmax;
+
+  /* Parameters describing a spherical shell test wind */
+  double shell_vmin, shell_vmax, shell_beta;
+  double shell_rmin, shell_rmax;
+
+  /*Parameters defining a corona in a ring above a disk */
+  double corona_rmin, corona_rmax;	//the minimum and maximu radius of the corona
+
+  double corona_base_density, corona_scale_height;	//the density at the base of the corona and the scale height
+
+  double corona_vel_frac;	// the radial velocity of the corona in units of the keplerian velocity
+  
+// 70b - ksl - 110809  The next set of sources relate to a compton torus that is initially at least just related to AGN
+
+  int compton_torus;		/* 0 if there is no Compton torus; 1 otherwise */
+  double compton_torus_rmin;	/* The minimum radius of the torus */
+  double compton_torus_rmax;	/* The maximum radius of the torus */
+  double compton_torus_zheight;	/* The height of the torus. */
+  double compton_torus_tau;	/* The optical depth through the torus at the height. */
+  double compton_torus_te;	/* The initial temperature of the torus */
+
+
+
 }
 zdom[MaxDom];   // One structure for each domain
 
 int ndomain;  /* This is a convenience variable and one should be careful that ndomain and geo.ndomain
 		 are identical once all the inputs are read in, whehter from the command line
 		 or from an old wind model */
-int NTOT_CELLS;  /*This is the total number of cells for all domains */
-int NTOT_PLASMA; /*This is the total size of the PLASMA ptr  */
 
 /* the geometry structure contains information that applies to all domains or alternatimve
  a single domain.  Information that is domain specific should be placed directly in the domain
@@ -438,39 +546,6 @@ int ndomain;  /*The number of domains in a model*/
 geo;
 
 
-typedef struct plane /*SWM 10-10-14 - Switched to TypeDef */
-{
-  double x[3];			/* A position included in the plane (usally the "center" */
-  double lmn[3];		/* A unit vector perpendicular to the plane (usually in the "positive" direction */
-} plane_dummy, *PlanePtr;
-plane_dummy plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
-					   primary to the seconday */
-
-
-/* Note that since we are interested in biconical flows, our definition of a cone is not exactly
- * what one might guess.  The cone is defined in the positive z direction but reflected through 
- * the xy plane.  
- * 56d -- Beginning with 56d, ksl has switched to a new definition of cones, that is intended to
- * make it possible to use ds_to_cone easier as part of different coordinate systems.  The new definition
- * is based on the intersection of the cone with the z axis rather than the intersection with
- * the disk plane.  At present both definitions are used in the program and therefore both shold
- * be defined.  Once the new definition is promulgated through the entire program, and verified
- * the old definitions can be elimiated.  05jul -- ksl
- */
-
-typedef struct cone
-{
-  double z;			/* The place where the cone intersects the z axis (used after 56d) */
-  double dzdr;			/* the slope (used after 56d) */
-}
-cone_dummy, *ConePtr;
-
-ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods */
-
-struct cone windcone[2];	/* The cones that define the boundary of winds like SV or kwd */
-
-
-
 #define NRINGS	301		/* The actual number of rings completely defined
 				   is NRINGS-1 ... or from 0 to NRINGS-2.  This is
 				   because you need an outer radius...but the rest
@@ -569,6 +644,7 @@ and PART in whatever, as n and n+1
 
 typedef struct wind
 {
+	int ndomain;		/*The domain associated with this element of the wind */
   int nwind;			/*A self-reference to this cell in the wind structure */
   int nplasma;			/*A cross refrence to the corresponding cell in the plasma structure */
   double x[3];			/*position of inner vertex of cell */
@@ -922,7 +998,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_MATRIX_BB 8	               // matrix solver BB model
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9     // matrix solver spectral model
 
-#define NDIM_MAX 500                // maximum size of the grid in each dimension
+// XXX these arrrays need to be removed down ot midz_var
 double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
 double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */
 

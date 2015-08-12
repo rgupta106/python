@@ -114,27 +114,30 @@ spherical_make_grid (w)
 {
   double dr, dlogr;
   int n;
+  int ndom;
 
-  for (n = 0; n < zdom[0].NDIM; n++)
+  ndom=w[0].ndomain;
+
+  for (n = 0; n < zdom[ndom].ndim; n++)
     {
       {
 
 	/*Define the grid points */
-	if (zdom[0].log_linear == 1)
+	if (zdom[ndom].log_linear == 1)
 	  {			// linear intervals
 
-	    dr = (geo.rmax - geo.rstar) / (zdom[0].NDIM - 3);
+	    dr = (geo.rmax - geo.rstar) / (zdom[ndom].ndim - 3);
 	    w[n].r = geo.rstar + n * dr;
 	    w[n].rcen = w[n].r + 0.5 * dr;
 	  }
 	else
 	  {			//logarithmic intervals
-	    dlogr = (log10 (geo.rmax / geo.rstar)) / (zdom[0].NDIM - 3);
+	    dlogr = (log10 (geo.rmax / geo.rstar)) / (zdom[ndom].ndim - 3);
 	    w[n].r = geo.rstar * pow (10., dlogr * (n - 1));
 	    w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (n)) +
 					   pow (10., dlogr * (n - 1)));
 	    Log ("OLD W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
-	    dlogr = (log10 (geo.rmax / geo.wind_rmin)) / (zdom[0].NDIM - 3);
+	    dlogr = (log10 (geo.rmax / geo.wind_rmin)) / (zdom[ndom].NDIM - 3);
 	    w[n].r = geo.wind_rmin * pow (10., dlogr * (n - 1));
 	    w[n].rcen = 0.5 * geo.wind_rmin * (pow (10., dlogr * (n)) +
 					       pow (10., dlogr * (n - 1)));
@@ -266,26 +269,29 @@ spherical_volumes (w, icomp)
   double rmin, rmax;
   double thetamin, thetamax;
   int jj, kk;
+  int ndom;
+
+  ndom=w[0].ndomain;
 
   thetamin = 0.0;
   thetamax = 0.5 * PI;
 
-  for (i = 0; i < zdom[0].NDIM; i++)
+  for (i = 0; i < zdom[ndom].ndim; i++)
     {
       {
 	n = i;
-	rmin = wind_x[i];
-	rmax = wind_x[i + 1];
+	rmin = zdom[ndom].wind_x[i];
+	rmax = zdom[ndom].wind_x[i + 1];
 
 	w[n].vol = 4. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin);
 
-	if (i == zdom[0].NDIM - 1)
+	if (i == zdom[ndom].ndim - 1)
 	  {
 	    fraction = 0.0;	/* Force outside edge volues to zero */
 	    jj = 0;
 	    kk = RESOLUTION;
 	  }
-	else if (i == zdom[0].NDIM - 2)
+	else if (i == zdom[ndom].ndim - 2)
 	  {
 	    fraction = 0.0;	/* Force outside edge volues to zero */
 	    jj = 0;
@@ -307,7 +313,7 @@ spherical_volumes (w, icomp)
 		    x[0] = r * sin (theta);
 		    x[1] = 0;
 		    x[2] = r * cos (theta);;
-		    if (where_in_wind (x) == icomp)
+		    if (where_in_wind (ndom,x) == icomp)
 		      {
 			num += r * r * sin (theta);	/* 0 implies in wind */
 			jj++;
@@ -380,11 +386,14 @@ spherical_where_in_grid (x)
   int n;
   double r;
   double f;
+  int ndom;
+
+  ndom=what_domain(x);
 
   r = length (x);
 
   /* Check to see if x is outside the region of the calculation */
-  if (r > wind_x[zdom[0].NDIM - 1])
+  if (r > wind_x[zdom[ndom].ndim - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -393,7 +402,7 @@ spherical_where_in_grid (x)
       return (-1);		/*x is inside grid */
     }
 
-  fraction (r, wind_x, zdom[0].NDIM, &n, &f, 0);
+  fraction (r, wind_x, zdom[ndom].ndim, &n, &f, 0);
 
   return (n);
 }
@@ -432,10 +441,13 @@ spherical_get_random_location (n, icomp, x)
   int inwind;
   double r, rmin, rmax;
   double theta, phi;
+  
+  int ndom;
+  ndom=what_domain(x);
 
-  wind_n_to_ij (n, &i, &j);
-  rmin = wind_x[i];
-  rmax = wind_x[i + 1];
+  wind_n_to_ij (ndom, n, &i, &j);
+  rmin = zdom[ndom].wind_x[i];
+  rmax = zdom[ndom].wind_x[i + 1];
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = -1;
@@ -452,7 +464,7 @@ spherical_get_random_location (n, icomp, x)
       x[0] = r * cos (phi) * sin (theta);
       x[1] = r * sin (phi) * sin (theta);
       x[2] = r * cos (theta);
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind */
+      inwind = where_in_wind (ndom,x);	/* Some photons will not be in the wind */
     }
 
   return (inwind);

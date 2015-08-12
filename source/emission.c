@@ -335,7 +335,6 @@ Synopsis: photo_gen_wind(p,w,weight,freqmin,freqmax,istart) generates
 	photons within the wind and stores them in the photon array
 
 Arguments:		
-	WindPtr w;
 	PhotPtr p;
 	double weight;				weight of each photon
 	double freqmin,freqmax;          frequency interval within which photons are created
@@ -363,6 +362,8 @@ History:
 			stopgap for now since should not need to be addressing
 			wind array.  Changed call to remove wind since entire
 			grid was tramsmitted.
+	15aug	ksl	Began trying to incorporate multiple domains for this, but 
+			at this point this will not work
  
 **************************************************************/
 
@@ -380,6 +381,10 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int icell;
   int nplasma;
   int nnscat;
+
+  Error("XXX This is not modified for multiple domains; I don't even know what we want\n")
+
+
 
 
   photstop = photstart + nphot;

@@ -534,14 +534,16 @@ History:
 	02feb	ksl	Allowed for different dimensions in x and z
 	05apr	ksl	Added error_check to verify routine 
 			is not called with spherical coordiantes
+	15aug	ksl	Added a new input variable which is the
+			domain number nd
 **************************************************************/
 
 
 int
-wind_n_to_ij (n, i, j)
-     int n, *i, *j;
+wind_n_to_ij (nd, n, i, j)
+     int nd, n, *i, *j;
 {
-  if (zdom[0].coord_type == SPHERICAL)
+  if (zdom[nd].coord_type == SPHERICAL)
     {
       *i = n;
       *j = 0;
@@ -553,16 +555,16 @@ wind_n_to_ij (n, i, j)
 	 n);
 */
     }
-  *i = n / zdom[0].MDIM;
-  *j = n - (*i) * zdom[0].MDIM;
+  *i = n / zdom[nd].mdim;
+  *j = n - (*i) * zdom[nd].mdim;
   return (0);
 }
 
 int
-wind_ij_to_n (i, j, n)
-     int *n, i, j;
+wind_ij_to_n (ndom,i, j, n)
+     int ndom,*n, i, j;
 {
-  if (zdom[0].coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
       Error
 	("Warning: wind_ij_to_n being called for spherical coordinates %d %d\n",
@@ -570,6 +572,6 @@ wind_ij_to_n (i, j, n)
       *n = i;
       return (*n);
     }
-  *n = i * zdom[0].MDIM + j;		// zdom[0].MDIM because the array is in z order
+  *n = i * zdom[ndom].mdim + j;		// zdom[0].MDIM because the array is in z order
   return (*n);
 }

@@ -137,18 +137,21 @@ create_maps (ichoice)
 
 
 int
-calloc_wind (nelem)
+calloc_wind (w,nelem)
+	WindPtr *w;
      int nelem;
 {
 
-  if (wmain != NULL)
+	WindPtr z;
+
+  if (w != NULL)
     {
-      free (wmain);
+      free (*w);
     }
 
-  wmain = (WindPtr) calloc (sizeof (wind_dummy), nelem + 1);
+  *w = (WindPtr) calloc (sizeof (wind_dummy), nelem + 1);
 
-  if (wmain == NULL)
+  if (*w == NULL)
     {
       Error
 	("There is a problem in allocating memory for the wind structure\n");
@@ -156,10 +159,15 @@ calloc_wind (nelem)
     }
   else
     {
-      Log_silent
+      Log
 	("Allocated %10d bytes for each of %5d elements of             totaling %10.1f Mb\n",
 	 sizeof (wind_dummy), nelem, 1.e-6 * nelem * sizeof (wind_dummy));
     }
+
+  //Log("nelem %d\n",nelem);
+  //Log("Test1  %d\n",*w[0]->inwind);
+  z=zwind[0];
+  Log("Test  %d\n",z[10].inwind);
 
   return (0);
 }

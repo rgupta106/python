@@ -65,15 +65,19 @@ History:
 			now if it is within machine precision of
 			pi/2, is returns that the photon is in wind
 			and does not do the check. 
+	15aug	ksl	Modify so where in wind refers to a specific region
 			
 **************************************************************/
 
 int
-where_in_wind (x)
+where_in_wind (ndom,x)
+	int ndom;
      double x[];
 {
   double rho, rho_min, rho_max, z;
   int ireturn;
+
+
 
   ireturn = W_ALL_INWIND;
 
@@ -82,11 +86,11 @@ where_in_wind (x)
 
 
   /* First check to see if photon is inside star or outside wind */
-  if ((z = length (x)) < geo.wind_rmin)
+  if ((z = length (x)) < zdom[ndom].wind_rmin)
     {
       ireturn = (-3);		/*x is inside the wind  radially */
     }
-  else if (z > geo.wind_rmax)
+  else if (z > zdom[ndom].wind_rmax)
     {
       ireturn = (-4);		/*the position is beyond the wind radially */
     }
@@ -107,10 +111,10 @@ where_in_wind (x)
      precedes the check to see if the position is in the wind
    */
 
-  if (geo.compton_torus)
+  if (zdom[ndom].compton_torus)
     {
-      if (geo.compton_torus_rmin < rho && rho < geo.compton_torus_rmax
-	  && z < geo.compton_torus_zheight)
+      if (zdom[ndom].compton_torus_rmin < rho && rho < zdom[ndom].compton_torus_rmax
+	  && z < zdom[ndom].compton_torus_zheight)
 	{
 	  return (W_ALL_INTORUS);
 	}
@@ -124,13 +128,13 @@ where_in_wind (x)
    * 111124 ksl
    */
 
-  if (geo.wind_type == 8)
+  if (zdom[ndom].wind_type == ELVIS)
     {
-      if (rho < geo.sv_rmin)
+      if (rho < zdom[ndom].sv_rmin)
 	{
 	  return (-1);
 	}
-      if (rho < geo.sv_rmax && z < geo.elvis_offset)
+      if (rho < zdom[ndom].sv_rmax && z < zdom[ndom].elvis_offset)
 	{
 	  return (W_ALL_INWIND);
 	}
@@ -139,7 +143,7 @@ where_in_wind (x)
 
 
   /* Check if one is inside the inner windcone */
-  if (rho < (rho_min = geo.wind_rho_min + z * tan (geo.wind_thetamin)))
+  if (rho < (rho_min = zdom[ndom].wind_rho_min + z * tan (zdom[ndom].wind_thetamin)))
     {
       ireturn = (-1);
     }
@@ -148,9 +152,9 @@ where_in_wind (x)
   /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
      check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
 
-  else if (fabs (geo.wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
+  else if (fabs (zdom[ndom].wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
     {
-      if (rho > (rho_max = geo.wind_rho_max + z * tan (geo.wind_thetamax)))
+      if (rho > (rho_max = geo.wind_rho_max + z * tan (zdom[ndom].wind_thetamax)))
 	{
 	  ireturn = (-2);
 	}
@@ -380,56 +384,73 @@ model_rho (x)
      double x[];
 {
   double rho;
-  if (geo.wind_type == 0)
+  int ndom;
+  int wind_type;
+
+  ndom=what_domain(x);
+
+  wind_type=zdom[ndom].wind_type;
+
+
+
+  if (wind_type == SV)
     {
       rho = sv_rho (x);
     }
-  else if (geo.wind_type == 1)
+  else if (wind_type == SPHERE)
     {
       rho = stellar_rho (x);
     }
-  else if (geo.wind_type == 3)
+  else if (wind_type == HYDRO)
     {
       rho = hydro_rho (x);
     }
-  else if (geo.wind_type == 4)
+  else if (wind_type == CORONA)
     {
       rho = corona_rho (x);
     }
-  else if (geo.wind_type == 5)
+  else if (wind_type == KNIGGE)
     {
       rho = kn_rho (x);
     }
-  else if (geo.wind_type == 6)
+  else if (wind_type == HOMOLOGOUS)
     {
       rho = homologous_rho (x);
     }
-  else if (geo.wind_type == 7)
+  else if (wind_type == YSO)
     {
       rho = yso_rho (x);
     }
-  else if (geo.wind_type == 8)
+  else if (wind_type == ELVIS)
     {
       rho = elvis_rho (x);
     }
-  else if (geo.wind_type == 9)
+  else if (wind_type == SHELL)
     {
       rho = stellar_rho (x);
     }
   else
     {
-      Error ("wind2d: Unknown windtype %d\n", geo.wind_type);
+      Error ("wind2d: Unknown windtype %d\n", wind_type);
       exit (0);
     }
 
   /* 70b - as this is written the torus simply overlays the wind */
 
-  if ((where_in_wind (x) == W_ALL_INTORUS)
-      || (where_in_wind (x) == W_PART_INTORUS))
+  if ((where_in_wind (ndom,x) == W_ALL_INTORUS)
+      || (where_in_wind (ndom,x) == W_PART_INTORUS))
     {
       rho = torus_rho (x);
     }
 
   return (rho);
 
+}
+
+
+int what_domain(x)
+	double x[];
+{
+	Log("Houston: What domain needs to be written");
+	return (0);
 }

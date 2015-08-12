@@ -167,6 +167,7 @@ in the plasma structure */
 		was done to enable one to handle missing files differently in
 		different cases
 14jul	nsh	Code added to read in variable length arrays in plasma structure
+15aug	ksl	Allow for multiple domains
 */
 int
 wind_read (filename)
@@ -174,6 +175,7 @@ wind_read (filename)
 {
   FILE *fptr, *fopen ();
   int n, m;
+  int nd;
   char line[LINELENGTH];
   char version[LINELENGTH];
 
@@ -202,10 +204,17 @@ wind_read (filename)
 
 /* Now allocate space for the wind array */
 
-  NPLASMA = geo.nplasma;
+  for (nd=0;nd<geo.ndomain;nd++){
+  	calloc_wind (zwind[nd],zdom[nd].ndim2);
+  	n += fread (zwind[nd], sizeof (wind_dummy), zdom[nd].ndim2, fptr);
+  }
 
-  calloc_wind (zdom[0].NDIM2);
-  n += fread (wmain, sizeof (wind_dummy), zdom[0].NDIM2, fptr);
+
+
+
+  //OLD1508 n += fread (wmain, sizeof (wind_dummy), zdom[0].NDIM2, fptr);
+
+  NPLASMA = geo.nplasma;
 
   calloc_plasma (NPLASMA);
 

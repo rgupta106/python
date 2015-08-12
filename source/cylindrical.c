@@ -50,9 +50,11 @@ cylind_ds_in_cell (p)
   double a, b, c, root[2];
   double z1, z2, q;
   double smax;
-  int where_in_grid (), wind_n_to_ij ();
   int quadratic ();
   int radiation ();
+
+  int ndom;
+  ndom=what_domain(p->x);
 
 
   if ((p->grid = n = where_in_grid (p->x)) < 0)
@@ -61,7 +63,7 @@ cylind_ds_in_cell (p)
       return (n);		/* Photon was not in wind */
     }
 
-  wind_n_to_ij (n, &ix, &iz);	/*Convert the index n to two dimensions */
+  wind_n_to_ij (ndom,n, &ix, &iz);	/*Convert the index n to two dimensions */
 
   smax = VERY_BIG;		//initialize smax to a large number
 
@@ -141,6 +143,15 @@ cylind_make_grid (w)
   double dr, dz, dlogr, dlogz;
   int i, j, n;
 
+  int ndim,mdim,ndom;
+  double xlog_scale,zlog_scale;
+
+  /* Find the size, etc of this particular WindPtr from the domain */
+
+  ndom=w[0].ndomain;
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
      to propagate.  This is the reason we divide by zdom[0].NDIM-2 here, rather than zdom[0].NDIM-1 */
@@ -148,19 +159,19 @@ cylind_make_grid (w)
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < zdom[0].NDIM; i++)
+  for (i = 0; i < ndim; i++)
     {
-      for (j = 0; j < zdom[0].MDIM; j++)
+      for (j = 0; j < mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (ndom,i, j, &n);
 	  w[n].x[1] = w[n].xcen[1] = 0;	//The cells are all defined in the xz plane
 
 	  /*Define the grid points */
 	  if (zdom[0].log_linear == 1)
 	    {			// linear intervals
 
-	      dr = geo.rmax / (zdom[0].NDIM - 3);
-	      dz = geo.rmax / (zdom[0].MDIM - 3);
+	      dr = geo.rmax / (ndim - 3);
+	      dz = geo.rmax / (mdim - 3);
 	      w[n].x[0] = i * dr;	/* The first zone is at the inner radius of
 					   the wind */
 	      w[n].x[2] = j * dz;
@@ -170,31 +181,31 @@ cylind_make_grid (w)
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (geo.rmax / zdom[0].xlog_scale)) / (zdom[0].NDIM - 3);
-	      dlogz = (log10 (geo.rmax / zdom[0].zlog_scale)) / (zdom[0].MDIM - 3);
+	      dlogr = (log10 (geo.rmax / zdom[ndom].xlog_scale)) / (ndim - 3);
+	      dlogz = (log10 (geo.rmax / zdom[ndom].zlog_scale)) / (mdim - 3);
 	      if (i == 0)
 		{
 		  w[n].x[0] = 0.0;
-		  w[n].xcen[0] = 0.5 * zdom[0].xlog_scale;
+		  w[n].xcen[0] = 0.5 * zdom[ndom].xlog_scale;
 		}
 	      else
 		{
-		  w[n].x[0] = zdom[0].xlog_scale * pow (10., dlogr * (i - 1));
+		  w[n].x[0] = zdom[ndom].xlog_scale * pow (10., dlogr * (i - 1));
 		  w[n].xcen[0] =
-		    0.5 * zdom[0].xlog_scale * (pow (10., dlogr * (i - 1)) +
+		    0.5 * zdom[ndom].xlog_scale * (pow (10., dlogr * (i - 1)) +
 					    pow (10., dlogr * (i)));
 		}
 
 	      if (j == 0)
 		{
 		  w[n].x[2] = 0.0;
-		  w[n].xcen[2] = 0.5 * zdom[0].zlog_scale;
+		  w[n].xcen[2] = 0.5 * zdom[ndom].zlog_scale;
 		}
 	      else
 		{
-		  w[n].x[2] = zdom[0].zlog_scale * pow (10, dlogz * (j - 1));
+		  w[n].x[2] = zdom[ndom].zlog_scale * pow (10, dlogz * (j - 1));
 		  w[n].xcen[2] =
-		    0.5 * zdom[0].zlog_scale * (pow (10., dlogz * (j - 1)) +
+		    0.5 * zdom[ndom].zlog_scale * (pow (10., dlogz * (j - 1)) +
 					    pow (10., dlogz * (j)));
 		}
 	    }
@@ -281,6 +292,7 @@ cylind_wind_complete (w)
 	11aug	ksl	Add ability to determine the volume for different
 			components.  See python.h for explanation of
 			relatinship between PART and ALL
+	15aug	ksl	Changes to accommodate multiple domains
  
 **************************************************************/
 
@@ -302,17 +314,22 @@ cylind_volumes (w, icomp)
   double dr, dz, x[3];
   int n_inwind;
 
+  int ndom;
 
-  for (i = 0; i < zdom[0].NDIM; i++)
+  /* Initialize for multiple domains */
+  ndom=w[0].ndomain;
+
+
+  for (i = 0; i < zdom[ndom].ndim; i++)
     {
-      for (j = 0; j < zdom[0].MDIM; j++)
+      for (j = 0; j < zdom[ndom].mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (ndom,i, j, &n);
 
 	  /* 70b - only try to assign the cell if it has not already been assigned */
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
-	      n_inwind = check_corners_inwind (n, icomp);
+	      n_inwind = check_corners_inwind (ndom,n, icomp);
 
 
 	      rmin = wind_x[i];
@@ -323,7 +340,7 @@ cylind_volumes (w, icomp)
 	      //leading factor of 2 added to allow for volume above and below plane (SSMay04)
 	      w[n].vol = 2 * PI * (rmax * rmax - rmin * rmin) * (zmax - zmin);
 
-	      n_inwind = cylind_is_cell_in_wind (n, icomp);
+	      n_inwind = cylind_is_cell_in_wind (ndom, n, icomp);
 
 	      if (n_inwind == W_NOT_INWIND)
 		{
@@ -351,7 +368,7 @@ cylind_volumes (w, icomp)
 			  x[0] = r;
 			  x[1] = 0;
 			  x[2] = z;
-			  if (where_in_wind (x) == icomp)
+			  if (where_in_wind (ndom,x) == icomp)
 			    {
 			      num += r * r;	/* 0 implies in wind */
 			      jj++;
@@ -371,12 +388,10 @@ cylind_volumes (w, icomp)
 		}
 	      else if (jj == kk)
 		{
-		  //OLD 70b w[n].inwind = W_ALL_INWIND;     // All of cell is inwind
 		  w[n].inwind = icomp;	// All of cell is inwind
 		}
 	      else
 		{
-		  //OLD 70b w[n].inwind = W_PART_INWIND;    // Some of cell is inwind
 		  w[n].inwind = icomp + 1;	// Some of cell is inwind
 		  w[n].vol *= fraction;
 		}
@@ -431,6 +446,9 @@ cylind_where_in_grid (x)
   double z;
   double rho;
   double f;
+  int ndom;
+
+  ndom=what_domain(x);
 
   z = fabs (x[2]);		/* This is necessary to get correct answer above
 				   and below plane */
@@ -439,7 +457,7 @@ cylind_where_in_grid (x)
   rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z
 						   axis */
   /* Check to see if x is outside the region of the calculation */
-  if (rho > wind_x[zdom[0].NDIM - 1] || z > wind_z[zdom[0].MDIM - 1])
+  if (rho > wind_x[zdom[ndom].ndim - 1] || z > wind_z[zdom[ndom].mdim - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -447,11 +465,11 @@ cylind_where_in_grid (x)
   if (rho < wind_x[0])
     return (-1);
 
-  fraction (rho, wind_x, zdom[0].NDIM, &i, &f, 0);
-  fraction (z, wind_z, zdom[0].MDIM, &j, &f, 0);
+  fraction (rho, wind_x, zdom[ndom].ndim, &i, &f, 0);
+  fraction (z, wind_z, zdom[ndom].mdim, &j, &f, 0);
 
   /* At this point i,j are just outside the x position */
-  wind_ij_to_n (i, j, &n);
+  wind_ij_to_n (ndom,i, j, &n);
 
   return (n);
 
@@ -481,6 +499,7 @@ cylind_where_in_grid (x)
  History:
 	04aug	ksl	52a -- Moved from where_in_wind as incorporated
 			multiple coordinate systems
+	15aug	ksl	Added domain number to call
  
 **************************************************************/
 
@@ -495,11 +514,15 @@ cylind_get_random_location (n, icomp, x)
   double r, rmin, rmax, zmin, zmax;
   double zz;
   double phi;
-  wind_n_to_ij (n, &i, &j);
-  rmin = wind_x[i];
-  rmax = wind_x[i + 1];
-  zmin = wind_z[j];
-  zmax = wind_z[j + 1];
+
+  ndom=what_domain(x);
+
+  wind_n_to_ij (ndom,n, &i, &j);
+
+  rmin = zdom[ndom].wind_x[i];
+  rmax = zdom[ndom].wind_x[i + 1];
+  zmin = zdom[ndom].wind_z[j];
+  zmax = zdom[ndom].wind_z[j + 1];
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = -1;
@@ -517,7 +540,7 @@ cylind_get_random_location (n, icomp, x)
 
 
       x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5));
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind
+      inwind = where_in_wind (ndom,x);	/* Some photons will not be in the wind
 					   because the boundaries of the wind split the grid cell */
     }
 
@@ -563,6 +586,9 @@ cylind_extend_density (w)
 {
 
   int i, j, n, m;
+  int ndom;
+
+  ndom=w[0].ndomain;
 
   /* Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
@@ -582,12 +608,12 @@ cylind_extend_density (w)
     {
       for (j = 0; j < zdom[0].MDIM - 1; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (ndom,i, j, &n);
 	  if (w[n].vol == 0)
 
 	    {			//Then this grid point is not in the wind 
 
-	      wind_ij_to_n (i + 1, j, &m);
+	      wind_ij_to_n (ndom, i + 1, j, &m);
 	      if (w[m].vol > 0)
 		{		//Then the windcell in the +x direction is in the wind and
 		  // we can copy the densities to the grid cell n
@@ -596,7 +622,7 @@ cylind_extend_density (w)
 		}
 	      else if (i > 0)
 		{
-		  wind_ij_to_n (i - 1, j, &m);
+		  wind_ij_to_n (ndom, i - 1, j, &m);
 		  if (w[m].vol > 0)
 		    {		//Then the grid cell in the -x direction is in the wind and
 		      // we can copy the densities to the grid cell n
@@ -627,11 +653,13 @@ History:
   11Aug	ksl	70b - Modified to incoporate torus
   		See python.h for more complete explanation
 		of how PART and ALL are related
+  15Aug	ksl	Added variable ndom to acount for domains
 
 */
 
 int
-cylind_is_cell_in_wind (n, icomp)
+cylind_is_cell_in_wind (ndom,n, icomp)
+	int ndom;               //Domain number
      int n;			// cell number
      int icomp;			// component number
 {
@@ -640,9 +668,9 @@ cylind_is_cell_in_wind (n, icomp)
   double rmin, rmax, zmin, zmax;
   double x[3];
   /* First check if the cell is in the boundary */
-  wind_n_to_ij (n, &i, &j);
+  wind_n_to_ij (ndom,n, &i, &j);
 
-  if (i >= (zdom[0].NDIM - 2) && j >= (zdom[0].MDIM - 2))
+  if (i >= (zdom[ndom].ndim - 2) && j >= (zdom[ndom].mdim - 2))
     {
       return (W_NOT_INWIND);
     }
@@ -650,7 +678,7 @@ cylind_is_cell_in_wind (n, icomp)
 /* Assume that if all four corners are in the wind that the
 entire cell is in the wind */
 
-  if (check_corners_inwind (n, icomp) == 4)
+  if (check_corners_inwind (ndom,n, icomp) == 4)
     {
       //OLD 70b return (W_ALL_INWIND);
       return (icomp);
@@ -659,10 +687,10 @@ entire cell is in the wind */
 /* So at this point, we have dealt with the easy cases */
 
 
-  rmin = wind_x[i];
-  rmax = wind_x[i + 1];
-  zmin = wind_z[j];
-  zmax = wind_z[j + 1];
+  rmin = zdom[ndom].wind_x[i];
+  rmax = zdom[ndom].wind_x[i + 1];
+  zmin = zdom[ndom].wind_z[j];
+  zmax = zdom[ndom].wind_z[j + 1];
 
   dr = (rmax - rmin) / RESOLUTION;
   dz = (zmax - zmin) / RESOLUTION;
@@ -676,14 +704,14 @@ entire cell is in the wind */
       x[2] = z;
 
       x[0] = rmin;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (ndom,x) == icomp)
 	{
 	  //OLD 70b return (W_PART_INWIND);
 	  return (icomp + 1);
 	}
 
       x[0] = rmax;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (ndom,x) == icomp)
 	{
 	  //OLD 70b return (W_PART_INWIND);
 	  return (icomp + 1);
@@ -699,14 +727,14 @@ entire cell is in the wind */
       x[0] = r;
 
       x[2] = zmin;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (ndom,x) == icomp)
 	{
 	  //OLD 70b return (W_PART_INWIND);
 	  return (icomp + 1);
 	}
 
       x[2] = zmax;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (ndom,x) == icomp)
 	{
 	  //OLD 70b return (W_PART_INWIND);
 	  return (icomp + 1);

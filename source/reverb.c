@@ -681,6 +681,8 @@ Notes:
 
 History:
 	26/2/15	-	Written by SWM
+	15Aug	ksl	Added support for multiple domains
+
 ***********************************************************/
 int
 wind_paths_point_index(int i, int j, int k, int i_top)
@@ -699,7 +701,11 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	char		c_file    [LINELENGTH];
 	int		i         , j, k, n, i_obs, i_cells, i_points;
 	double		r_theta, r_x, r_y, r_err;
+	int ndom;
+
 	PhotPtr		p_test = calloc(sizeof(p_dummy), 1);
+	
+	ndom=wind[0].ndomain;
 
 	//Get output filename
 		strcpy(c_file, c_file_in);	//Copy filename to new string
@@ -712,16 +718,16 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	Log("Outputting wind path information to file '%s'.\n", c_file);
 
 
-	i_cells = 2 * (zdom[0].NDIM - 1) * (zdom[0].MDIM - 1) * g_path_data->i_theta_res;
-	i_points = 2 * zdom[0].NDIM * zdom[0].MDIM * (g_path_data->i_theta_res + 1);
+	i_cells = 2 * (zdom[ndom].ndim - 1) * (zdom[ndom].mdim - 1) * g_path_data->i_theta_res;
+	i_points = 2 * zdom[ndom].ndim * zdom[ndom].mdim * (g_path_data->i_theta_res + 1);
 
 	fprintf(fptr, "# vtk DataFile Version 2.0\n");
 	fprintf(fptr, "Wind file data\nASCII\n");
 	fprintf(fptr, "DATASET UNSTRUCTURED_GRID\n");
 	fprintf(fptr, "POINTS %d float\n", i_points);
-	for (i = 0; i < zdom[0].NDIM; i++) {
-		for (j = 0; j < zdom[0].MDIM; j++) {
-			wind_ij_to_n(i, j, &n);
+	for (i = 0; i < zdom[ndom].ndim; i++) {
+		for (j = 0; j < zdom[ndom].MDIM; j++) {
+			wind_ij_to_n(ndom, i, j, &n);
 
 			for (k = 0; k <= g_path_data->i_theta_res; k++) {
 				r_theta = k * (PI / (double)g_path_data->i_theta_res);
@@ -737,8 +743,8 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	fprintf(fptr, "\n");
 
 	fprintf(fptr, "CELLS %d %d\n", i_cells, 9 * i_cells);
-	for (i = 0; i < zdom[0].NDIM - 1; i++) {
-		for (j = 0; j < zdom[0].MDIM - 1; j++) {
+	for (i = 0; i < zdom[ndom].ndim - 1; i++) {
+		for (j = 0; j < zdom[ndom].mdim - 1; j++) {
 			for (k = 0; k < g_path_data->i_theta_res; k++) {
 				fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
 					wind_paths_point_index(i, j, k, 1),
@@ -771,9 +777,9 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 
 	fprintf(fptr, "SCALARS phot_count float 1\n");
 	fprintf(fptr, "LOOKUP_TABLE default\n");
-	for (i = 0; i < zdom[0].NDIM - 1; i++) {
-		for (j = 0; j < zdom[0].MDIM - 1; j++) {
-			wind_ij_to_n(i, j, &n);
+	for (i = 0; i < zdom[ndom].ndim - 1; i++) {
+		for (j = 0; j < zdom[ndom].mdim - 1; j++) {
+			wind_ij_to_n(ndom, i, j, &n);
 			for (k = 0; k < g_path_data->i_theta_res; k++) {
 				fprintf(fptr, "%d\n", wind[n].paths->i_num);
 				fprintf(fptr, "%d\n", wind[n].paths->i_num);
@@ -783,9 +789,9 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 
 	fprintf(fptr, "SCALARS path_errors float 1\n");
 	fprintf(fptr, "LOOKUP_TABLE default\n");
-	for (i = 0; i < zdom[0].NDIM - 1; i++) {
-		for (j = 0; j < zdom[0].MDIM - 1; j++) {
-			wind_ij_to_n(i, j, &n);
+	for (i = 0; i < zdom[ndom].ndim - 1; i++) {
+		for (j = 0; j < zdom[ndom].mdim - 1; j++) {
+			wind_ij_to_n(ndom, i, j, &n);
 			for (k = 0; k < g_path_data->i_theta_res; k++) {
 				if (wind[n].paths->i_num > 0) {
 					r_err = sqrt((double)wind[n].paths->i_num) /
@@ -803,9 +809,9 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 
 	fprintf(fptr, "SCALARS path_rel_diff_from_direct float 1\n");
 	fprintf(fptr, "LOOKUP_TABLE default\n");
-	for (i = 0; i < zdom[0].NDIM - 1; i++) {
-		for (j = 0; j < zdom[0].MDIM - 1; j++) {
-			wind_ij_to_n(i, j, &n);
+	for (i = 0; i < zdom[ndom].ndim - 1; i++) {
+		for (j = 0; j < zdom[ndom].mdim - 1; j++) {
+			wind_ij_to_n(ndom, i, j, &n);
 			for (k = 0; k < g_path_data->i_theta_res; k++) {
 				if (wind[n].paths->i_num > 0) {
 					double		f_diff;
@@ -829,9 +835,9 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 
 	fprintf(fptr, "SCALARS path_average float 1\n");
 	fprintf(fptr, "LOOKUP_TABLE default\n");
-	for (i = 0; i < zdom[0].NDIM - 1; i++) {
-		for (j = 0; j < zdom[0].MDIM - 1; j++) {
-			wind_ij_to_n(i, j, &n);
+	for (i = 0; i < zdom[ndom].ndim - 1; i++) {
+		for (j = 0; j < zdom[ndom].mdim - 1; j++) {
+			wind_ij_to_n(ndom, i, j, &n);
 			for (k = 0; k < g_path_data->i_theta_res; k++) {
 				if (wind[n].paths->i_num > 0) {
 					fprintf(fptr, "%g\n", wind[n].paths->d_path);
@@ -849,9 +855,9 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 		fprintf(fptr, "LOOKUP_TABLE default\n");
 		stuff_v(xxspec[MSPEC + i_obs].lmn, p_test->lmn);
 
-		for (i = 0; i < zdom[0].NDIM - 1; i++) {
-			for (j = 0; j < zdom[0].MDIM - 1; j++) {
-				wind_ij_to_n(i, j, &n);
+		for (i = 0; i < zdom[ndom].NDIM - 1; i++) {
+			for (j = 0; j < zdom[ndom].mdim - 1; j++) {
+				wind_ij_to_n(ndom, i, j, &n);
 				for (k = 0; k < g_path_data->i_theta_res; k++) {
 					if (wind[n].paths->i_num > 0) {
 						r_theta = k * (PI / (double)g_path_data->i_theta_res);
