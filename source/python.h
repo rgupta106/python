@@ -131,23 +131,45 @@ enum coord_type_enum
   	}; 
 
 
+/* List of possible wind_types */
+
+#define SV   			0
+#define	SPHERE  		1
+#define	PREVIOUS 		2
+#define	HYDRO 			3
+#define	CORONA 			4
+#define KNIGGE			5
+#define	HOMOLOGOUS 		6
+#define	YSO 			7
+#define	ELVIS 			8
+#define	SHELL 			9
+#define	NONE 			10
+#define	DISK_ATMOS 		11
+
+
+#define MaxDom			10
+
+
 struct domain
 {
 	char name[LINELENGTH];
+	int wind_type;
 	int NDIM,MDIM,NDIM2;
 	int ndim,mdim,ndim2;
-	int nstart;  //the beginning location in wmain of this component
+	int nstart,nstop;  //the beginning and end (-1) location in wmain of this component
   	enum coord_type_enum coord_type;
   	int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
   	double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
 					   will be located at xlog_scale,zlog_scale */
 
 }
-xdom[10];   // One structure for each domain
+xdom[MaxDom];   // One structure for each domain
 
 int ndomain;  /* This is a convenience variable and one should be careful that ndomain and geo.ndomain
 		 are identical once all the inputs are read in, whehter from the command line
 		 or from an old wind model */
+int NTOT_CELLS;  /*This is the total number of cells for all domains */
+int NTOT_PLASMA; /*This is the total size of the PLASMA ptr  */
 
 /* the geometry structure contains information that applies to all domains or alternatimve
  a single domain.  Information that is domain specific should be placed directly in the domain
@@ -204,7 +226,12 @@ int ndomain;  /*The number of domains in a model*/
   double disk_mdot;		/* mdot of  DISK */
   double diskrad, diskrad_sq;
   double disk_z0, disk_z1;	/* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
-  int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file */
+  int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file
+ 				Added in order to separate the question of whether we are continuing an old run fro
+			       the type of wind model 	*/
+  int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
+  				Added in order to separate the question of whether we are continuing an old run fro
+				the type of wind model */                  
   int star_radiation, disk_radiation;	/* 1 means consider radiation from star, disk,  bl, and/or wind */
   int bl_radiation, wind_radiation, agn_radiation;
   int matom_radiation;		/* Added by SS Jun 2004: for use in macro atom computations of detailed spectra
@@ -569,7 +596,7 @@ typedef struct wind
 }
 wind_dummy, *WindPtr;
 
-WindPtr wmain;
+WindPtr wmain,zwind[MaxDom];
 
 /* 57+ - 06jun -- plasma is a new structure that contains information about the properties of the
 plasma in regions of the geometry that are actually included n the wind 
@@ -750,7 +777,7 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   //COOLSTR kpkt_rates;
 } plasma_dummy, *PlasmaPtr;
 
-PlasmaPtr plasmamain;
+PlasmaPtr plasmamain,zplasma[MaxDom];
 
 /* A storage area for photons.  The idea is that it is sometimes time-consuming to create the
 cumulative distribution function for a process, but trivial to create more than one photon 

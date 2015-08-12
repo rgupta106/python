@@ -393,13 +393,18 @@ main (argc, argv)
 
       rdint
 	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
-	 &geo.wind_type);
-      if (geo.wind_type!=10) {
+	 &xdom[ndomain].wind_type);
+
+      geo.run_type=0;
+      if (xdom[ndomain].wind_type==PREVIOUS){
+	      geo.run_type=PREVIOUS;
+      }
+      else if (xdom[ndomain].wind_type!=10) {
 	      strcat(xdom[ndomain].name,"Wind");
 	      ndomain++;
       }
 
-      if (geo.wind_type == 2)
+      if (geo.run_type == PREVIOUS)
 	{
 	  /* This option is for the confusing case where we want to start with
 	     a previous wind model, but we are going to write the result to a
@@ -418,7 +423,7 @@ main (argc, argv)
 	      Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
 	      exit (0);
 	    }
-	  geo.wind_type = 2;	// after wind_read one will have a different wind_type otherwise
+	  geo.run_type = PREVIOUS;	// after wind_read one will have a different wind_type otherwise
 	  w = wmain;
 
 
@@ -458,7 +463,7 @@ main (argc, argv)
 	  exit (0);
 	}
       w = wmain;
-      geo.wind_type = 2;	// We read the data from a file
+      geo.run_type = PREVIOUS;	// We read the data from a file
       xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
 
       if (geo.pcycle > 0)
@@ -575,7 +580,7 @@ main (argc, argv)
     geo.macro_simple = 1;	// Make everything simple if no macro atoms -- 57h
 
   //SS - initalise the choice of handling for macro pops.
-  if (geo.wind_type == 2)
+  if (geo.run_type == PREVIOUS)
     {
       geo.macro_ioniz_mode = 1;	// Now that macro atom properties are available for restarts
     }
@@ -640,13 +645,13 @@ main (argc, argv)
   get_radiation_sources (); 
 
 
-  if (geo.wind_type == 2)
+  if (geo.run_type == PREVIOUS)
     {
       disk_illum = geo.disk_illum;
     }
 
 
-  if (geo.wind_type != 2)	// Start of block to define a model for the first time
+  if (geo.run_type != PREVIOUS)	// Start of block to define a model for the first time
     {
 
       /* get_stellar_params gets information like mstar, rstar, tstar etc.
@@ -724,7 +729,7 @@ main (argc, argv)
   /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
   the cones are never defined for an rtheta grid if the model is restarted */
 
-  if (xdom[0].coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta wind cone if we are restarting
+  if (xdom[0].coord_type==RTHETA && geo.run_type==PREVIOUS) //We need to generate an rtheta wind cone if we are restarting
     {
       rtheta_make_cones(wmain);
     }
@@ -793,8 +798,8 @@ main (argc, argv)
       scat_select[n] = 1000;
       top_bot_select[n] = 0;
     }
-  swavemin = 1450;
-  swavemax = 1650;
+  swavemin = 850;
+  swavemax = 1850;
 
 /* These two variables have to do with what types of spectra are created n the
  * spectrum files. They are not associated with the nature of the spectra that
@@ -1025,7 +1030,7 @@ geo.ndomain=ndomain;  // Store ndomain in geo so that it can be saved
 
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
-  if (geo.wind_type != 2)	// Define the wind and allocate the arrays the first time
+  if (geo.run_type != PREVIOUS)	// Define the wind and allocate the arrays the first time
 {
     define_wind ();
 }
@@ -1162,7 +1167,7 @@ geo.ndomain=ndomain;  // Store ndomain in geo so that it can be saved
 
       /* JM 1409 -- We used to execute subcycles here, but these have been removed */
 
-	  if (!geo.wind_radiation || (geo.wcycle == 0 && geo.wind_type != 2))
+	  if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != PREVIOUS))
 	    iwind = -1;		/* Do not generate photons from wind */
 	  else
 	    iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
@@ -1730,7 +1735,7 @@ init_geo ()
   geo.auger_ionization = 1;	//Default is on.
 
 
-  geo.wind_type = 0;		// Schlossman and Vitello
+  geo.run_type = 0;		// Not a restart of a previous run
 
   geo.star_ion_spectype = geo.star_spectype
     = geo.disk_ion_spectype = geo.disk_spectype
@@ -1951,7 +1956,7 @@ get_spectype (yesno, question, spectype)
 	*spectype = SPECTYPE_CL_TAB;
       else
 	{
-	  if (geo.wind_type == 2)
+	  if (geo.run_type == PREVIOUS)
 	    {			// Continuing an old model
 	      strcpy (model_list, geo.model_list[get_spectype_count]);
 	    }
