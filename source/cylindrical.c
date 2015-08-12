@@ -143,24 +143,24 @@ cylind_make_grid (w)
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
-     to propagate.  This is the reason we divide by xdom[0].NDIM-2 here, rather than xdom[0].NDIM-1 */
+     to propagate.  This is the reason we divide by zdom[0].NDIM-2 here, rather than zdom[0].NDIM-1 */
 
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < xdom[0].NDIM; i++)
+  for (i = 0; i < zdom[0].NDIM; i++)
     {
-      for (j = 0; j < xdom[0].MDIM; j++)
+      for (j = 0; j < zdom[0].MDIM; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 	  w[n].x[1] = w[n].xcen[1] = 0;	//The cells are all defined in the xz plane
 
 	  /*Define the grid points */
-	  if (xdom[0].log_linear == 1)
+	  if (zdom[0].log_linear == 1)
 	    {			// linear intervals
 
-	      dr = geo.rmax / (xdom[0].NDIM - 3);
-	      dz = geo.rmax / (xdom[0].MDIM - 3);
+	      dr = geo.rmax / (zdom[0].NDIM - 3);
+	      dz = geo.rmax / (zdom[0].MDIM - 3);
 	      w[n].x[0] = i * dr;	/* The first zone is at the inner radius of
 					   the wind */
 	      w[n].x[2] = j * dz;
@@ -170,31 +170,31 @@ cylind_make_grid (w)
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (geo.rmax / xdom[0].xlog_scale)) / (xdom[0].NDIM - 3);
-	      dlogz = (log10 (geo.rmax / xdom[0].zlog_scale)) / (xdom[0].MDIM - 3);
+	      dlogr = (log10 (geo.rmax / zdom[0].xlog_scale)) / (zdom[0].NDIM - 3);
+	      dlogz = (log10 (geo.rmax / zdom[0].zlog_scale)) / (zdom[0].MDIM - 3);
 	      if (i == 0)
 		{
 		  w[n].x[0] = 0.0;
-		  w[n].xcen[0] = 0.5 * xdom[0].xlog_scale;
+		  w[n].xcen[0] = 0.5 * zdom[0].xlog_scale;
 		}
 	      else
 		{
-		  w[n].x[0] = xdom[0].xlog_scale * pow (10., dlogr * (i - 1));
+		  w[n].x[0] = zdom[0].xlog_scale * pow (10., dlogr * (i - 1));
 		  w[n].xcen[0] =
-		    0.5 * xdom[0].xlog_scale * (pow (10., dlogr * (i - 1)) +
+		    0.5 * zdom[0].xlog_scale * (pow (10., dlogr * (i - 1)) +
 					    pow (10., dlogr * (i)));
 		}
 
 	      if (j == 0)
 		{
 		  w[n].x[2] = 0.0;
-		  w[n].xcen[2] = 0.5 * xdom[0].zlog_scale;
+		  w[n].xcen[2] = 0.5 * zdom[0].zlog_scale;
 		}
 	      else
 		{
-		  w[n].x[2] = xdom[0].zlog_scale * pow (10, dlogz * (j - 1));
+		  w[n].x[2] = zdom[0].zlog_scale * pow (10, dlogz * (j - 1));
 		  w[n].xcen[2] =
-		    0.5 * xdom[0].zlog_scale * (pow (10., dlogz * (j - 1)) +
+		    0.5 * zdom[0].zlog_scale * (pow (10., dlogz * (j - 1)) +
 					    pow (10., dlogz * (j)));
 		}
 	    }
@@ -225,17 +225,17 @@ cylind_wind_complete (w)
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
 
-  for (i = 0; i < xdom[0].NDIM; i++)
-    wind_x[i] = w[i * xdom[0].MDIM].x[0];
-  for (j = 0; j < xdom[0].MDIM; j++)
+  for (i = 0; i < zdom[0].NDIM; i++)
+    wind_x[i] = w[i * zdom[0].MDIM].x[0];
+  for (j = 0; j < zdom[0].MDIM; j++)
     wind_z[j] = w[j].x[2];
-  for (i = 0; i < xdom[0].NDIM - 1; i++)
-    wind_midx[i] = 0.5 * (w[i * xdom[0].MDIM].x[0] + w[(i + 1) * xdom[0].MDIM].x[0]);
-  for (j = 0; j < xdom[0].MDIM - 1; j++)
+  for (i = 0; i < zdom[0].NDIM - 1; i++)
+    wind_midx[i] = 0.5 * (w[i * zdom[0].MDIM].x[0] + w[(i + 1) * zdom[0].MDIM].x[0]);
+  for (j = 0; j < zdom[0].MDIM - 1; j++)
     wind_midz[j] = 0.5 * (w[j].x[2] + w[(j + 1)].x[2]);
   /* Add something plausible for the edges */
-  wind_midx[xdom[0].NDIM - 1] = 2. * wind_x[xdom[0].NDIM - 1] - wind_midx[xdom[0].NDIM - 2];
-  wind_midz[xdom[0].MDIM - 1] = 2. * wind_z[xdom[0].MDIM - 1] - wind_midz[xdom[0].MDIM - 2];
+  wind_midx[zdom[0].NDIM - 1] = 2. * wind_x[zdom[0].NDIM - 1] - wind_midx[zdom[0].NDIM - 2];
+  wind_midz[zdom[0].MDIM - 1] = 2. * wind_z[zdom[0].MDIM - 1] - wind_midz[zdom[0].MDIM - 2];
 
   return (0);
 }
@@ -303,9 +303,9 @@ cylind_volumes (w, icomp)
   int n_inwind;
 
 
-  for (i = 0; i < xdom[0].NDIM; i++)
+  for (i = 0; i < zdom[0].NDIM; i++)
     {
-      for (j = 0; j < xdom[0].MDIM; j++)
+      for (j = 0; j < zdom[0].MDIM; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 
@@ -399,7 +399,7 @@ cylind_volumes (w, icomp)
  Returns:
  	where_in_grid normally  returns the cell number associated with
  		a position.  If the position is in the grid this will be a positive
- 		integer < xdom[0].NDIM*xdom[0].MDIM.
+ 		integer < zdom[0].NDIM*zdom[0].MDIM.
  	x is inside the grid        -1
 	x is outside the grid       -2
  Description:	
@@ -439,7 +439,7 @@ cylind_where_in_grid (x)
   rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z
 						   axis */
   /* Check to see if x is outside the region of the calculation */
-  if (rho > wind_x[xdom[0].NDIM - 1] || z > wind_z[xdom[0].MDIM - 1])
+  if (rho > wind_x[zdom[0].NDIM - 1] || z > wind_z[zdom[0].MDIM - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -447,8 +447,8 @@ cylind_where_in_grid (x)
   if (rho < wind_x[0])
     return (-1);
 
-  fraction (rho, wind_x, xdom[0].NDIM, &i, &f, 0);
-  fraction (z, wind_z, xdom[0].MDIM, &j, &f, 0);
+  fraction (rho, wind_x, zdom[0].NDIM, &i, &f, 0);
+  fraction (z, wind_z, zdom[0].MDIM, &j, &f, 0);
 
   /* At this point i,j are just outside the x position */
   wind_ij_to_n (i, j, &n);
@@ -578,9 +578,9 @@ cylind_extend_density (w)
      *
    */
 
-  for (i = 0; i < xdom[0].NDIM - 1; i++)
+  for (i = 0; i < zdom[0].NDIM - 1; i++)
     {
-      for (j = 0; j < xdom[0].MDIM - 1; j++)
+      for (j = 0; j < zdom[0].MDIM - 1; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 	  if (w[n].vol == 0)
@@ -642,7 +642,7 @@ cylind_is_cell_in_wind (n, icomp)
   /* First check if the cell is in the boundary */
   wind_n_to_ij (n, &i, &j);
 
-  if (i >= (xdom[0].NDIM - 2) && j >= (xdom[0].MDIM - 2))
+  if (i >= (zdom[0].NDIM - 2) && j >= (zdom[0].MDIM - 2))
     {
       return (W_NOT_INWIND);
     }

@@ -98,22 +98,22 @@ define_wind ()
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
-     to propagate.  This is the reason we divide by xdom[0].NDIM-2 here, rather than xdom[0].NDIM-1 */
+     to propagate.  This is the reason we divide by zdom[0].NDIM-2 here, rather than zdom[0].NDIM-1 */
 
-  xdom[0].NDIM = xdom[0].ndim;
-  xdom[0].MDIM = xdom[0].mdim;
-  xdom[0].NDIM2 = xdom[0].NDIM * xdom[0].MDIM;
-  calloc_wind (xdom[0].NDIM2);
+  zdom[0].NDIM = zdom[0].ndim;
+  zdom[0].MDIM = zdom[0].mdim;
+  zdom[0].NDIM2 = zdom[0].NDIM * zdom[0].MDIM;
+  calloc_wind (zdom[0].NDIM2);
   w = wmain;
 
   /* initialize inwind to a known state */
 
-  for (n = 0; n < xdom[0].NDIM2; n++)
+  for (n = 0; n < zdom[0].NDIM2; n++)
     {
       w[n].inwind = W_NOT_INWIND;
     }
 
-  //printf ("Got to define wind %i\n",xdom[0].coord_type);
+  //printf ("Got to define wind %i\n",zdom[0].coord_type);
 
   if (geo.wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
     {
@@ -121,15 +121,15 @@ define_wind ()
 	("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
       shell_make_grid (w);
     }
-  else if (xdom[0].coord_type == SPHERICAL)
+  else if (zdom[0].coord_type == SPHERICAL)
     {
       spherical_make_grid (w);
     }
-  else if (xdom[0].coord_type == CYLIND)
+  else if (zdom[0].coord_type == CYLIND)
     {
       cylind_make_grid (w);
     }
-  else if (xdom[0].coord_type == RTHETA)
+  else if (zdom[0].coord_type == RTHETA)
     {
       if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
       	{
@@ -140,16 +140,16 @@ define_wind ()
         rtheta_make_grid (w);
 	}
     }
-  else if (xdom[0].coord_type == CYLVAR)
+  else if (zdom[0].coord_type == CYLVAR)
     {
       cylvar_make_grid (w);
     }
   else
     {
       Error ("define_wind: Don't know how to make coordinate type %d\n",
-	     xdom[0].coord_type);
+	     zdom[0].coord_type);
     }
-  for (n = 0; n < xdom[0].NDIM2; n++)
+  for (n = 0; n < zdom[0].NDIM2; n++)
     {
       /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
        * made in the program to allow more that one coordinate system in python 
@@ -180,15 +180,15 @@ recreated when a windfile is read into the program
    */
 
 
-  if (xdom[0].coord_type == SPHERICAL)
+  if (zdom[0].coord_type == SPHERICAL)
     {
       spherical_volumes (w, W_ALL_INWIND);
     }
-  else if (xdom[0].coord_type == CYLIND)
+  else if (zdom[0].coord_type == CYLIND)
     {
       cylind_volumes (w, W_ALL_INWIND);
     }
-  else if (xdom[0].coord_type == RTHETA)
+  else if (zdom[0].coord_type == RTHETA)
     {
       if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates We dont need to work out if cells are in the wind, they are known to be in the wind.
       	{
@@ -199,7 +199,7 @@ recreated when a windfile is read into the program
         rtheta_volumes (w, W_ALL_INWIND);
 	}
     }
-  else if (xdom[0].coord_type == CYLVAR)
+  else if (zdom[0].coord_type == CYLVAR)
     {
       cylvar_volumes (w, W_ALL_INWIND);
     }
@@ -207,7 +207,7 @@ recreated when a windfile is read into the program
     {
       Error
 	("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
-	 xdom[0].coord_type);
+	 zdom[0].coord_type);
     }
 
 /* Now check if there is a second component and if so get the volumes for these cells as well */
@@ -215,19 +215,19 @@ recreated when a windfile is read into the program
   if (geo.compton_torus)
     {
 
-      if (xdom[0].coord_type == SPHERICAL)
+      if (zdom[0].coord_type == SPHERICAL)
 	{
 	  spherical_volumes (w, W_ALL_INTORUS);
 	}
-      else if (xdom[0].coord_type == CYLIND)
+      else if (zdom[0].coord_type == CYLIND)
 	{
 	  cylind_volumes (w, W_ALL_INTORUS);
 	}
-      else if (xdom[0].coord_type == RTHETA)
+      else if (zdom[0].coord_type == RTHETA)
 	{
 	  rtheta_volumes (w, W_ALL_INTORUS);
 	}
-      else if (xdom[0].coord_type == CYLVAR)
+      else if (zdom[0].coord_type == CYLVAR)
 	{
 	  cylvar_volumes (w, W_ALL_INTORUS);
 	}
@@ -235,7 +235,7 @@ recreated when a windfile is read into the program
 	{
 	  Error
 	    ("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
-	     xdom[0].coord_type);
+	     zdom[0].coord_type);
 	}
 
     }
@@ -247,7 +247,7 @@ recreated when a windfile is read into the program
 
   n_vol = n_inwind = n_part = 0;
   n_comp = n_comp_part = 0;
-  for (n = 0; n < xdom[0].NDIM2; n++)
+  for (n = 0; n < zdom[0].NDIM2; n++)
     {
       if (w[n].vol > 0.0)
 	n_vol++;
@@ -263,7 +263,7 @@ recreated when a windfile is read into the program
 
   Log
     ("wind2d: %3d cells of which %d are in inwind, %d partially in_wind, & %d with pos. vol\n",
-     xdom[0].NDIM2, n_inwind, n_part, n_vol);
+     zdom[0].NDIM2, n_inwind, n_part, n_vol);
 
   if (geo.compton_torus)
     {
@@ -275,9 +275,9 @@ recreated when a windfile is read into the program
 /* 56d --Now check the volume calculations for 2d wind models 
    58b --If corners are in the wind, but there is zero_volume then ignore.
 */
-  if (xdom[0].coord_type != SPHERICAL)
+  if (zdom[0].coord_type != SPHERICAL)
     {
-      for (n = 0; n < xdom[0].NDIM2; n++)
+      for (n = 0; n < zdom[0].NDIM2; n++)
 	{
 	  n_inwind = check_corners_inwind (n, 0);
 	  if (w[n].vol == 0 && n_inwind > 0)
@@ -306,9 +306,9 @@ recreated when a windfile is read into the program
     {
       NPLASMA = n_vol;
     }
-  else				/* Force NPLASMA to equal xdom[0].NDIM2 (for diagnostic reasons) */
+  else				/* Force NPLASMA to equal zdom[0].NDIM2 (for diagnostic reasons) */
     {
-      NPLASMA = xdom[0].NDIM2;
+      NPLASMA = zdom[0].NDIM2;
     }
 
   calloc_plasma (NPLASMA);
@@ -484,24 +484,24 @@ be optional which variables beyond here are moved to structures othere than Wind
      which is below. One would simply integrate over various surface integrals to make it happen.  
 */
 
-  if (xdom[0].coord_type == CYLIND)
+  if (zdom[0].coord_type == CYLIND)
     {
       mdotwind = 0;
       mdotbase = 0;
-      for (i = 0; i < xdom[0].NDIM - 1; i++)
+      for (i = 0; i < zdom[0].NDIM - 1; i++)
 	{
-	  n = i * xdom[0].MDIM + (xdom[0].MDIM / 2);
+	  n = i * zdom[0].MDIM + (zdom[0].MDIM / 2);
 // rr is router * router - rinner *rinner for this shell
 	  rr =
-	    w[n + xdom[0].MDIM].x[0] * w[n + xdom[0].MDIM].x[0] + w[n +
-						    xdom[0].MDIM].x[1] * w[n +
-								   xdom[0].MDIM].x[1]
+	    w[n + zdom[0].MDIM].x[0] * w[n + zdom[0].MDIM].x[0] + w[n +
+						    zdom[0].MDIM].x[1] * w[n +
+								   zdom[0].MDIM].x[1]
 	    - (w[n].x[0] * w[n].x[0] + w[n].x[1] * w[n].x[1]);
-	  if (w[i * xdom[0].MDIM].inwind == W_ALL_INWIND)
+	  if (w[i * zdom[0].MDIM].inwind == W_ALL_INWIND)
 	    {
-	      nplasma = w[i * xdom[0].MDIM].nplasma;
+	      nplasma = w[i * zdom[0].MDIM].nplasma;
 	      mdotbase +=
-		plasmamain[nplasma].rho * PI * rr * w[i * xdom[0].MDIM].v[2];
+		plasmamain[nplasma].rho * PI * rr * w[i * zdom[0].MDIM].v[2];
 	    }
 	  if (w[n].inwind == W_ALL_INWIND)
 	    {
@@ -519,7 +519,7 @@ be optional which variables beyond here are moved to structures othere than Wind
     {
       Error
 	("wind2d.c: Don't know how to check wind mdot for this coordtype %d\n",
-	 xdom[0].coord_type);
+	 zdom[0].coord_type);
     }
 
   return (0);
@@ -537,7 +537,7 @@ be optional which variables beyond here are moved to structures othere than Wind
  Returns:
  	where_in_grid normally  returns the cell number associated with
  		a postion.  If the photon is in the grid this will be a positive
- 		integer < xdom[0].NDIM*xdom[0].MDIM.
+ 		integer < zdom[0].NDIM*zdom[0].MDIM.
  	photon is inside the grid        -1
 	photon is outside the grid       -2
  Description:	
@@ -577,25 +577,25 @@ where_in_grid (x)
   if (wig_x != x[0] || wig_y != x[1] || wig_z != x[2])	// Calculate if new position
     {
 
-      if (xdom[0].coord_type == CYLIND)
+      if (zdom[0].coord_type == CYLIND)
 	{
 	  n = cylind_where_in_grid (x);
 	}
-      else if (xdom[0].coord_type == RTHETA)
+      else if (zdom[0].coord_type == RTHETA)
 	{
 	  n = rtheta_where_in_grid (x);
 	}
-      else if (xdom[0].coord_type == SPHERICAL)
+      else if (zdom[0].coord_type == SPHERICAL)
 	{
 	  n = spherical_where_in_grid (x);
 	}
-      else if (xdom[0].coord_type == CYLVAR)
+      else if (zdom[0].coord_type == CYLVAR)
 	{
 	  n = cylvar_where_in_grid (x, 0, &fx, &fz);
 	}
       else
 	{
-	  Error ("where_in_grid: Unknown coord_type %d\n", xdom[0].coord_type);
+	  Error ("where_in_grid: Unknown coord_type %d\n", zdom[0].coord_type);
 	  exit (0);
 	}
 
@@ -709,7 +709,7 @@ vwind_xyz (p, v)
 
   rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
 
-  if (xdom[0].coord_type == SPHERICAL)
+  if (zdom[0].coord_type == SPHERICAL)
     {				// put the velocity into cylindrical coordinates on the xz axis
       x = sqrt (vv[0] * vv[0] + vv[2] * vv[2]);	//v_r
       r = length (p->x);
@@ -820,7 +820,7 @@ wind_div_v (w)
   double div, delta;
   double length ();
   double xxx[3];
-  for (icell = 0; icell < xdom[0].NDIM2; icell++)
+  for (icell = 0; icell < zdom[0].NDIM2; icell++)
     {
       /* Find the center of the cell */
 
@@ -1029,26 +1029,26 @@ get_random_location (n, icomp, x)
      double x[];		// Returned position
 {
 
-  if (xdom[0].coord_type == CYLIND)
+  if (zdom[0].coord_type == CYLIND)
     {
       cylind_get_random_location (n, icomp, x);
     }
-  else if (xdom[0].coord_type == RTHETA)
+  else if (zdom[0].coord_type == RTHETA)
     {
       rtheta_get_random_location (n, icomp, x);
     }
-  else if (xdom[0].coord_type == SPHERICAL)
+  else if (zdom[0].coord_type == SPHERICAL)
     {
       spherical_get_random_location (n, icomp, x);
     }
-  else if (xdom[0].coord_type == CYLVAR)
+  else if (zdom[0].coord_type == CYLVAR)
     {
       cylvar_get_random_location (n, icomp, x);
     }
   else
     {
       Error ("get_random_location: Don't know this coord_type %d\n",
-	     xdom[0].coord_type);
+	     zdom[0].coord_type);
       exit (0);
     }
 
@@ -1115,15 +1115,15 @@ check_corners_inwind (n, icomp)
   wind_n_to_ij (n, &i, &j);
 
   n_inwind = 0;
-  if (i < (xdom[0].NDIM - 2) && j < (xdom[0].MDIM - 2))
+  if (i < (zdom[0].NDIM - 2) && j < (zdom[0].MDIM - 2))
     {
       if (where_in_wind (wmain[n].x) == icomp)
 	n_inwind++;
       if (where_in_wind (wmain[n + 1].x) == icomp)
 	n_inwind++;
-      if (where_in_wind (wmain[n + xdom[0].MDIM].x) == icomp)
+      if (where_in_wind (wmain[n + zdom[0].MDIM].x) == icomp)
 	n_inwind++;
-      if (where_in_wind (wmain[n + xdom[0].MDIM + 1].x) == icomp)
+      if (where_in_wind (wmain[n + zdom[0].MDIM + 1].x) == icomp)
 	n_inwind++;
     }
   return (n_inwind);

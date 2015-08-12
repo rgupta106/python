@@ -66,8 +66,8 @@ get_corona_params ()
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      xdom[0].xlog_scale = 0.3 * geo.corona_rmin;
-      xdom[0].zlog_scale = 0.3 * geo.corona_scale_height;
+      zdom[0].xlog_scale = 0.3 * geo.corona_rmin;
+      zdom[0].zlog_scale = 0.3 * geo.corona_scale_height;
     }
 
 /* Prior to 01dec, windcones were defined here.  But this broke a capability to continue

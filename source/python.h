@@ -163,7 +163,7 @@ struct domain
 					   will be located at xlog_scale,zlog_scale */
 
 }
-xdom[MaxDom];   // One structure for each domain
+zdom[MaxDom];   // One structure for each domain
 
 int ndomain;  /* This is a convenience variable and one should be careful that ndomain and geo.ndomain
 		 are identical once all the inputs are read in, whehter from the command line

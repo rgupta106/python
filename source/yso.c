@@ -107,8 +107,8 @@ in units of WD radii */
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      xdom[0].xlog_scale = geo.rstar;
-      xdom[0].zlog_scale = 1e7;
+      zdom[0].xlog_scale = geo.rstar;
+      zdom[0].zlog_scale = 1e7;
     }
 
   return (0);

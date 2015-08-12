@@ -69,7 +69,7 @@ create_maps (ichoice)
   if (ichoice)
     {
       //map to reduce space
-      for (i = 0; i < xdom[0].NDIM2; i++)
+      for (i = 0; i < zdom[0].NDIM2; i++)
 	{
 	  wmain[i].nwind = i;
 	  if (wmain[i].vol > 0)
@@ -95,7 +95,7 @@ create_maps (ichoice)
   else
     //one plama cell for each wind cell
     {
-      for (i = 0; i < xdom[0].NDIM2; i++)
+      for (i = 0; i < zdom[0].NDIM2; i++)
 	{
 	  wmain[i].nwind = i;
 	  wmain[i].nplasma = i;

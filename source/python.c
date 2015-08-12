@@ -355,9 +355,9 @@ main (argc, argv)
 
 /* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
 
-  xdom[0].NDIM = xdom[0].ndim;
-  xdom[0].MDIM = xdom[0].mdim;
-  xdom[0].NDIM2 = xdom[0].ndim * xdom[0].mdim;
+  zdom[0].NDIM = zdom[0].ndim;
+  zdom[0].MDIM = zdom[0].mdim;
+  zdom[0].NDIM2 = zdom[0].ndim * zdom[0].mdim;
 
 /* End of definition of wind arrays */
 
@@ -393,14 +393,14 @@ main (argc, argv)
 
       rdint
 	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
-	 &xdom[ndomain].wind_type);
+	 &zdom[ndomain].wind_type);
 
       geo.run_type=0;
-      if (xdom[ndomain].wind_type==PREVIOUS){
+      if (zdom[ndomain].wind_type==PREVIOUS){
 	      geo.run_type=PREVIOUS;
       }
-      else if (xdom[ndomain].wind_type!=10) {
-	      strcat(xdom[ndomain].name,"Wind");
+      else if (zdom[ndomain].wind_type!=10) {
+	      strcat(zdom[ndomain].name,"Wind");
 	      ndomain++;
       }
 
@@ -612,27 +612,27 @@ main (argc, argv)
 
   /* ksl 1508 Add parameters for a disk atmosphere */
   geo.disk_atmosphere=0;
-  xdom[ndomain].ndim=30;
-  xdom[ndomain].mdim=10;
+  zdom[ndomain].ndim=30;
+  zdom[ndomain].mdim=10;
 
   rdint("disk.atmosphere(0=no,1=yes)",&geo.disk_atmosphere);
   if (geo.disk_atmosphere!=0) {
-	  strcat(xdom[ndomain].name,"Disk Atmosphere");
+	  strcat(zdom[ndomain].name,"Disk Atmosphere");
 	  input_int=1;
 	  rdint  ("atmos.coord.system(1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
 	switch(input_int)
 	{
-		case 0: xdom[ndomain].coord_type = SPHERICAL; break;
-		case 1: xdom[ndomain].coord_type = CYLIND; break;
-		case 2: xdom[ndomain].coord_type = RTHETA; break;
-		case 3: xdom[ndomain].coord_type = CYLVAR; break;
+		case 0: zdom[ndomain].coord_type = SPHERICAL; break;
+		case 1: zdom[ndomain].coord_type = CYLIND; break;
+		case 2: zdom[ndomain].coord_type = RTHETA; break;
+		case 3: zdom[ndomain].coord_type = CYLVAR; break;
 		default: Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
 0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
 }
 
 
-	  rdint ("atmos.dim.in.x_or_r.direction", &xdom[ndomain].ndim);
-	  rdint ("atmos.dim.in.z_or_theta.direction", &xdom[ndomain].mdim);
+	  rdint ("atmos.dim.in.x_or_r.direction", &zdom[ndomain].ndim);
+	  rdint ("atmos.dim.in.z_or_theta.direction", &zdom[ndomain].mdim);
 	  ndomain++;
   }
 
@@ -729,7 +729,7 @@ main (argc, argv)
   /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
   the cones are never defined for an rtheta grid if the model is restarted */
 
-  if (xdom[0].coord_type==RTHETA && geo.run_type==PREVIOUS) //We need to generate an rtheta wind cone if we are restarting
+  if (zdom[0].coord_type==RTHETA && geo.run_type==PREVIOUS) //We need to generate an rtheta wind cone if we are restarting
     {
       rtheta_make_cones(wmain);
     }
@@ -1727,9 +1727,9 @@ init_geo ()
 	geo.ndomain=ndomain=0;   /*ndomain is a convenince variable so we do not always
 				   need to write geo.ndomain but it should nearly always
 				   be set to the same value as geo.ndomain */
-  xdom[0].coord_type = 1;
-  xdom[0].ndim = 30;
-  xdom[0].mdim = 30;
+  zdom[0].coord_type = 1;
+  zdom[0].ndim = 30;
+  zdom[0].mdim = 30;
   geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
   geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
   geo.auger_ionization = 1;	//Default is on.
@@ -1742,7 +1742,7 @@ init_geo ()
     = geo.bl_ion_spectype = geo.bl_spectype = SPECTYPE_BB;
   geo.agn_ion_spectype = SPECTYPE_POW;	// 130605 - nsh - moved from python.c
 
-  xdom[0].log_linear = 0;		/* Set intervals to be logarithmic */
+  zdom[0].log_linear = 0;		/* Set intervals to be logarithmic */
 
   geo.rmax = 1e11;
   geo.rmax_sq = geo.rmax * geo.rmax;

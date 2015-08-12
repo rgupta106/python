@@ -72,7 +72,7 @@ wind_save (filename)
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
-  n += fwrite (wmain, sizeof (wind_dummy), xdom[0].NDIM2, fptr);
+  n += fwrite (wmain, sizeof (wind_dummy), zdom[0].NDIM2, fptr);
   n += fwrite (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
 
 /* NSH 1407 - The following loop writes out the variable length arrays
@@ -204,8 +204,8 @@ wind_read (filename)
 
   NPLASMA = geo.nplasma;
 
-  calloc_wind (xdom[0].NDIM2);
-  n += fread (wmain, sizeof (wind_dummy), xdom[0].NDIM2, fptr);
+  calloc_wind (zdom[0].NDIM2);
+  n += fread (wmain, sizeof (wind_dummy), zdom[0].NDIM2, fptr);
 
   calloc_plasma (NPLASMA);
 
@@ -321,26 +321,26 @@ wind_complete (w)
      WindPtr w;
 {
 
-  if (xdom[0].coord_type == SPHERICAL)
+  if (zdom[0].coord_type == SPHERICAL)
     {
       spherical_wind_complete (w);
     }
-  else if (xdom[0].coord_type == CYLIND)
+  else if (zdom[0].coord_type == CYLIND)
     {
       cylind_wind_complete (w);
     }
-  else if (xdom[0].coord_type == RTHETA)
+  else if (zdom[0].coord_type == RTHETA)
     {
       rtheta_wind_complete (w);
     }
-  else if (xdom[0].coord_type == CYLVAR)
+  else if (zdom[0].coord_type == CYLVAR)
     {
       cylvar_wind_complete (w);
     }
   else
     {
       Error ("wind_complete: Don't know how to complete coord_type %d\n",
-	     xdom[0].coord_type);
+	     zdom[0].coord_type);
       exit (0);
     }
 

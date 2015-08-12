@@ -161,23 +161,23 @@ cylvar_make_grid (w)
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
-     to propagate.  This is the reason we divide by xdom[0].NDIM-2 here, rather than xdom[0].NDIM-1 */
+     to propagate.  This is the reason we divide by zdom[0].NDIM-2 here, rather than zdom[0].NDIM-1 */
 
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < xdom[0].NDIM; i++)
+  for (i = 0; i < zdom[0].NDIM; i++)
     {
-      for (j = 0; j < xdom[0].MDIM; j++)
+      for (j = 0; j < zdom[0].MDIM; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 	  w[n].x[1] = w[n].xcen[n] = 0;	//The cells are all defined in the xz plane
 
 	  /*Define the grid points */
-	  if (xdom[0].log_linear == 1)
+	  if (zdom[0].log_linear == 1)
 	    {			// linear intervals
 
-	      dr = geo.rmax / (xdom[0].NDIM - 3);
+	      dr = geo.rmax / (zdom[0].NDIM - 3);
 	      w[n].x[0] = r = i * dr;	/* The first zone is at the inner radius of
 					   the wind */
 	      if (r < geo.diskrad)
@@ -187,7 +187,7 @@ cylvar_make_grid (w)
 	      else
 		z_offset = zdisk (geo.diskrad);
 
-	      dz = (geo.rmax - z_offset) / (xdom[0].MDIM - 4);
+	      dz = (geo.rmax - z_offset) / (zdom[0].MDIM - 4);
 	      if (j == 0)
 		w[n].x[2] = 0;
 	      else if (j == 1)
@@ -203,17 +203,17 @@ cylvar_make_grid (w)
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (geo.rmax / xdom[0].xlog_scale)) / (xdom[0].NDIM - 3);
+	      dlogr = (log10 (geo.rmax / zdom[0].xlog_scale)) / (zdom[0].NDIM - 3);
 	      if (i == 0)
 		{
 		  w[n].x[0] = r = 0.0;
-		  w[n].xcen[0] = 0.5 * xdom[0].xlog_scale + zdisk (r);
+		  w[n].xcen[0] = 0.5 * zdom[0].xlog_scale + zdisk (r);
 		}
 	      else
 		{
-		  w[n].x[0] = r = xdom[0].xlog_scale * pow (10., dlogr * (i - 1));
+		  w[n].x[0] = r = zdom[0].xlog_scale * pow (10., dlogr * (i - 1));
 		  w[n].xcen[0] =
-		    0.5 * xdom[0].xlog_scale * (pow (10., dlogr * (i - 1)) +
+		    0.5 * zdom[0].xlog_scale * (pow (10., dlogr * (i - 1)) +
 					    pow (10.,
 						 dlogr * (i))) + zdisk (r);
 		}
@@ -226,7 +226,7 @@ cylvar_make_grid (w)
 		z_offset = zdisk (geo.diskrad);
 
 	      dlogz =
-		(log10 ((geo.rmax - z_offset) / xdom[0].zlog_scale)) / (xdom[0].MDIM - 4);
+		(log10 ((geo.rmax - z_offset) / zdom[0].zlog_scale)) / (zdom[0].MDIM - 4);
 	      if (j == 0)
 		{
 		  w[n].x[2] = 0;
@@ -235,14 +235,14 @@ cylvar_make_grid (w)
 	      else if (j == 1)
 		{
 		  w[n].x[2] = 0.9 * z_offset;	// 0.9 is to keep the first grid cell out of wind
-		  w[n].xcen[2] = z_offset + 0.5 * xdom[0].zlog_scale;
+		  w[n].xcen[2] = z_offset + 0.5 * zdom[0].zlog_scale;
 		}
 	      else
 		{
 		  w[n].x[2] = z_offset +
-		    xdom[0].zlog_scale * pow (10, dlogz * (j - 2));
+		    zdom[0].zlog_scale * pow (10, dlogz * (j - 2));
 		  w[n].xcen[2] = z_offset +
-		    0.5 * xdom[0].zlog_scale * (pow (10., dlogz * (j - 2)) +
+		    0.5 * zdom[0].zlog_scale * (pow (10., dlogz * (j - 2)) +
 					    pow (10., dlogz * (j - 1)));
 		}
 	    }
@@ -276,7 +276,7 @@ Description:
 
 
 Notes: In principle, one would like to fix problem that the cones
-	are only defined out to xdom[0].MDIM-1 and xdom[0].NDIM-1, as this has the
+	are only defined out to zdom[0].MDIM-1 and zdom[0].NDIM-1, as this has the
 	potential of wasting space.  However, volumes have the same problem
 History:
 	05may	ksl	56a -- began modifications starting with same 
@@ -296,14 +296,14 @@ cylvar_wind_complete (w)
   /* First define the windcones for each cell */
   n = 0; // silence compiler warning
 
-  for (i = 0; i < xdom[0].NDIM - 1; i++)
+  for (i = 0; i < zdom[0].NDIM - 1; i++)
     {
-      for (j = 0; j < xdom[0].MDIM - 1; j++)
+      for (j = 0; j < zdom[0].MDIM - 1; j++)
 	{
 	  /* Everything is defined in the xz plane, so life is fairly easy */
-	  n = i * xdom[0].MDIM + j;
-	  dz = w[n + xdom[0].MDIM].x[2] - w[n].x[2];	// change in z for one step in rho
-	  drho = w[n + xdom[0].MDIM].x[0] - w[n].x[0];
+	  n = i * zdom[0].MDIM + j;
+	  dz = w[n + zdom[0].MDIM].x[2] - w[n].x[2];	// change in z for one step in rho
+	  drho = w[n + zdom[0].MDIM].x[0] - w[n].x[0];
 
 
 	  if (drho > 0)
@@ -324,16 +324,16 @@ cylvar_wind_complete (w)
 
    */
 
-  for (i = 0; i < xdom[0].NDIM; i++)
+  for (i = 0; i < zdom[0].NDIM; i++)
     {
-      wind_x[i] = w[i * xdom[0].MDIM].x[0];
-      wind_midx[i] = w[i * xdom[0].MDIM].xcen[0];
+      wind_x[i] = w[i * zdom[0].MDIM].x[0];
+      wind_midx[i] = w[i * zdom[0].MDIM].xcen[0];
     }
 
 
-  for (i = 0; i < xdom[0].NDIM; i++)
+  for (i = 0; i < zdom[0].NDIM; i++)
     {
-      for (j = 0; j < xdom[0].MDIM; j++)
+      for (j = 0; j < zdom[0].MDIM; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 	  wind_z_var[i][j] = w[n].x[2];
@@ -394,15 +394,15 @@ cylvar_volumes (w, icomp)
 
 
   /* Initialize all the volumes to 0 */
-  for (n = 0; n < xdom[0].NDIM2; n++)
+  for (n = 0; n < zdom[0].NDIM2; n++)
     {
       w[n].vol = 0;
       w[n].inwind = W_NOT_INWIND;
     }
 
-  for (i = 0; i < xdom[0].NDIM - 1; i++)
+  for (i = 0; i < zdom[0].NDIM - 1; i++)
     {
-      for (j = 0; j < xdom[0].MDIM - 1; j++)
+      for (j = 0; j < zdom[0].MDIM - 1; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 
@@ -410,34 +410,34 @@ cylvar_volumes (w, icomp)
 	  rmin = w[n].x[0];
 	  if (rmin > w[n + 1].x[0])
 	    rmin = w[n + 1].x[0];
-	  if (rmin > w[n + xdom[0].MDIM].x[0])
-	    rmin = w[n + xdom[0].MDIM].x[0];
-	  if (rmin > w[n + xdom[0].MDIM + 1].x[0])
-	    rmin = w[n + xdom[0].MDIM + 1].x[0];
+	  if (rmin > w[n + zdom[0].MDIM].x[0])
+	    rmin = w[n + zdom[0].MDIM].x[0];
+	  if (rmin > w[n + zdom[0].MDIM + 1].x[0])
+	    rmin = w[n + zdom[0].MDIM + 1].x[0];
 
 	  rmax = w[n].x[0];
 	  if (rmax < w[n + 1].x[0])
 	    rmax = w[n + 1].x[0];
-	  if (rmax < w[n + xdom[0].MDIM].x[0])
-	    rmax = w[n + xdom[0].MDIM].x[0];
-	  if (rmax < w[n + xdom[0].MDIM + 1].x[0])
-	    rmax = w[n + xdom[0].MDIM + 1].x[0];
+	  if (rmax < w[n + zdom[0].MDIM].x[0])
+	    rmax = w[n + zdom[0].MDIM].x[0];
+	  if (rmax < w[n + zdom[0].MDIM + 1].x[0])
+	    rmax = w[n + zdom[0].MDIM + 1].x[0];
 
 	  zmin = w[n].x[2];
 	  if (zmin > w[n + 1].x[2])
 	    zmin = w[n + 1].x[2];
-	  if (zmin > w[n + xdom[0].MDIM].x[2])
-	    zmin = w[n + xdom[0].MDIM].x[2];
-	  if (zmin > w[n + xdom[0].MDIM + 1].x[2])
-	    zmin = w[n + xdom[0].MDIM + 1].x[2];
+	  if (zmin > w[n + zdom[0].MDIM].x[2])
+	    zmin = w[n + zdom[0].MDIM].x[2];
+	  if (zmin > w[n + zdom[0].MDIM + 1].x[2])
+	    zmin = w[n + zdom[0].MDIM + 1].x[2];
 
 	  zmax = w[n].x[2];
 	  if (zmax < w[n + 1].x[2])
 	    zmax = w[n + 1].x[2];
-	  if (zmax < w[n + xdom[0].MDIM].x[2])
-	    zmax = w[n + xdom[0].MDIM].x[2];
-	  if (zmax < w[n + xdom[0].MDIM + 1].x[2])
-	    zmax = w[n + xdom[0].MDIM + 1].x[2];
+	  if (zmax < w[n + zdom[0].MDIM].x[2])
+	    zmax = w[n + zdom[0].MDIM].x[2];
+	  if (zmax < w[n + zdom[0].MDIM + 1].x[2])
+	    zmax = w[n + zdom[0].MDIM + 1].x[2];
 
 
 	  volume = 0;
@@ -452,8 +452,8 @@ cylvar_volumes (w, icomp)
 		  x[1] = 0;
 		  x[2] = z;
 		  if (bilin
-		      (x, w[i * xdom[0].MDIM + j].x, w[i * xdom[0].MDIM + j + 1].x,
-		       w[(i + 1) * xdom[0].MDIM + j].x, w[(i + 1) * xdom[0].MDIM + j + 1].x,
+		      (x, w[i * zdom[0].MDIM + j].x, w[i * zdom[0].MDIM + j + 1].x,
+		       w[(i + 1) * zdom[0].MDIM + j].x, w[(i + 1) * zdom[0].MDIM + j + 1].x,
 		       &f, &g) == 0)
 		    {
 		      kk++;
@@ -505,7 +505,7 @@ cylvar_volumes (w, icomp)
  Returns:
  	where_in_grid normally  returns the cell number associated with
  		a position.  If the position is in the grid this will be a positive
- 		integer < xdom[0].NDIM*xdom[0].MDIM.
+ 		integer < zdom[0].NDIM*zdom[0].MDIM.
  	x is inside the grid        -1
 	x is outside the grid       -2
 
@@ -567,13 +567,13 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
 
   if (ichoice == 0)
     {
-      fraction (rho, wind_x, xdom[0].NDIM, &i, fx, 0);
-      fraction (z[2], wind_z_var[i], xdom[0].MDIM, &j, fz, 0);	// This should get one close
+      fraction (rho, wind_x, zdom[0].NDIM, &i, fx, 0);
+      fraction (z[2], wind_z_var[i], zdom[0].MDIM, &j, fz, 0);	// This should get one close
     }
   else
     {
-      fraction (rho, wind_midx, xdom[0].NDIM, &i, fx, 0);
-      fraction (z[2], wind_midz_var[i], xdom[0].MDIM, &j, fz, 0);	// This should get one close
+      fraction (rho, wind_midx, zdom[0].NDIM, &i, fx, 0);
+      fraction (z[2], wind_midz_var[i], zdom[0].MDIM, &j, fz, 0);	// This should get one close
     }
 
   wind_ij_to_n (i, j, &cylvar_n_approx);
@@ -584,7 +584,7 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
   if (rho < wind_x[0])
     return (-1);
 
-  if (rho > wind_x[xdom[0].NDIM - 1] || z[2] > wind_z_var[i][xdom[0].MDIM - 1])
+  if (rho > wind_x[zdom[0].NDIM - 1] || z[2] > wind_z_var[i][zdom[0].MDIM - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -603,11 +603,11 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
       Error
 	("cylvar_where_in_grid: fraction and where_in_2d_cell incompatible %d -- %e %e\n",
 	 n, z[0], z[2]);
-      fraction (rho, wind_midx, xdom[0].NDIM, &i, fx, 0);
+      fraction (rho, wind_midx, zdom[0].NDIM, &i, fx, 0);
       ii = where_in_2dcell (ichoice, z, n, fx, fz);
     }
 
-//  while (ii != 0 && 0 <= j && j < xdom[0].MDIM)
+//  while (ii != 0 && 0 <= j && j < zdom[0].MDIM)
   while (ii != 0)
     {
       if (*fz < 0 && j == 0)
@@ -622,7 +622,7 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
 	    }
 	  break;
 	}
-      if (*fz > 1. && j == xdom[0].MDIM)
+      if (*fz > 1. && j == zdom[0].MDIM)
 	{
 	  // we are out of the grid at the "top" edge * fz = 0;
 	  n--;
@@ -729,34 +729,34 @@ cylvar_get_random_location (n, icomp, x)
   rmin = wmain[n].x[0];
   if (rmin > wmain[n + 1].x[0])
     rmin = wmain[n + 1].x[0];
-  if (rmin > wmain[n + xdom[0].MDIM].x[0])
-    rmin = wmain[n + xdom[0].MDIM].x[0];
-  if (rmin > wmain[n + xdom[0].MDIM + 1].x[0])
-    rmin = wmain[n + xdom[0].MDIM + 1].x[0];
+  if (rmin > wmain[n + zdom[0].MDIM].x[0])
+    rmin = wmain[n + zdom[0].MDIM].x[0];
+  if (rmin > wmain[n + zdom[0].MDIM + 1].x[0])
+    rmin = wmain[n + zdom[0].MDIM + 1].x[0];
 
   rmax = wmain[n].x[0];
   if (rmax < wmain[n + 1].x[0])
     rmax = wmain[n + 1].x[0];
-  if (rmax < wmain[n + xdom[0].MDIM].x[0])
-    rmax = wmain[n + xdom[0].MDIM].x[0];
-  if (rmax < wmain[n + xdom[0].MDIM + 1].x[0])
-    rmax = wmain[n + xdom[0].MDIM + 1].x[0];
+  if (rmax < wmain[n + zdom[0].MDIM].x[0])
+    rmax = wmain[n + zdom[0].MDIM].x[0];
+  if (rmax < wmain[n + zdom[0].MDIM + 1].x[0])
+    rmax = wmain[n + zdom[0].MDIM + 1].x[0];
 
   zmin = wmain[n].x[2];
   if (zmin > wmain[n + 1].x[2])
     zmin = wmain[n + 1].x[2];
-  if (zmin > wmain[n + xdom[0].MDIM].x[2])
-    zmin = wmain[n + xdom[0].MDIM].x[2];
-  if (zmin > wmain[n + xdom[0].MDIM + 1].x[2])
-    zmin = wmain[n + xdom[0].MDIM + 1].x[2];
+  if (zmin > wmain[n + zdom[0].MDIM].x[2])
+    zmin = wmain[n + zdom[0].MDIM].x[2];
+  if (zmin > wmain[n + zdom[0].MDIM + 1].x[2])
+    zmin = wmain[n + zdom[0].MDIM + 1].x[2];
 
   zmax = wmain[n].x[2];
   if (zmax < wmain[n + 1].x[2])
     zmax = wmain[n + 1].x[2];
-  if (zmax < wmain[n + xdom[0].MDIM].x[2])
-    zmax = wmain[n + xdom[0].MDIM].x[2];
-  if (zmax < wmain[n + xdom[0].MDIM + 1].x[2])
-    zmax = wmain[n + xdom[0].MDIM + 1].x[2];
+  if (zmax < wmain[n + zdom[0].MDIM].x[2])
+    zmax = wmain[n + zdom[0].MDIM].x[2];
+  if (zmax < wmain[n + zdom[0].MDIM + 1].x[2])
+    zmax = wmain[n + zdom[0].MDIM + 1].x[2];
 
 
   /* Generate a position which is both in the cell and in the wind */
@@ -831,9 +831,9 @@ cylvar_extend_density (w)
 
   int i, j, n, m;
 
-  for (i = 0; i < xdom[0].NDIM - 1; i++)
+  for (i = 0; i < zdom[0].NDIM - 1; i++)
     {
-      for (j = 0; j < xdom[0].MDIM - 1; j++)
+      for (j = 0; j < zdom[0].MDIM - 1; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 	  if (w[n].vol == 0)
@@ -961,13 +961,13 @@ cylvar_coord_fraction (ichoice, x, ii, frac, nelem)
   ii[0] = n;
   frac[0] = (1. - dz) * (1. - dr);
 
-  ii[1] = n + xdom[0].MDIM;
+  ii[1] = n + zdom[0].MDIM;
   frac[1] = (1. - dz) * dr;
 
   ii[2] = n + 1;
   frac[2] = (dz) * (1. - dr);
 
-  ii[3] = n + xdom[0].MDIM + 1;
+  ii[3] = n + zdom[0].MDIM + 1;
   frac[3] = (dz) * (dr);
   *nelem = 4;
 

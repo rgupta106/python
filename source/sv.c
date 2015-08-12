@@ -98,16 +98,16 @@ get_sv_wind_params ()
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      xdom[0].xlog_scale = geo.sv_rmin;
+      zdom[0].xlog_scale = geo.sv_rmin;
 
       /* !! 70b - This change is to accomodate the torus, but it is not obvious this is the
        * best way to set the scales now. It might be better do do this in make_grid!!  */
-      if (geo.compton_torus && geo.compton_torus_rmin < xdom[0].xlog_scale)
+      if (geo.compton_torus && geo.compton_torus_rmin < zdom[0].xlog_scale)
         {
-          xdom[0].xlog_scale = geo.compton_torus_rmin;
+          zdom[0].xlog_scale = geo.compton_torus_rmin;
         }
 
-     xdom[0].zlog_scale = geo.rstar;
+     zdom[0].zlog_scale = geo.rstar;
     }
 
   

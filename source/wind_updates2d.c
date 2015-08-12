@@ -632,17 +632,17 @@ free (commbuffer);
      *
    */
 
-  if (xdom[0].coord_type == CYLIND)
+  if (zdom[0].coord_type == CYLIND)
     cylind_extend_density (w);
-  else if (xdom[0].coord_type == RTHETA)
+  else if (zdom[0].coord_type == RTHETA)
     rtheta_extend_density (w);
-  else if (xdom[0].coord_type == SPHERICAL)
+  else if (zdom[0].coord_type == SPHERICAL)
     spherical_extend_density (w);
-  else if (xdom[0].coord_type == CYLVAR)
+  else if (zdom[0].coord_type == CYLVAR)
     cylvar_extend_density (w);
   else
     {
-      Error ("Wind_update2d: Unknown coordinate type %d\n", xdom[0].coord_type);
+      Error ("Wind_update2d: Unknown coordinate type %d\n", zdom[0].coord_type);
       exit (0);
     }
 
@@ -1125,7 +1125,7 @@ wind_rad_summary (w, filename, mode)
 
   fprintf (fptr,
 	   "n       x         z         j       ntot    ave_freq    T_rad      W       Lum     Lum_abs\n");
-  for (n = 0; n < xdom[0].NDIM2 - 1; n++)
+  for (n = 0; n < zdom[0].NDIM2 - 1; n++)
     {
       nplasma = w[n].nplasma;
       fprintf (fptr,

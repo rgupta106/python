@@ -297,7 +297,7 @@ coord_fraction (ichoice, x, ii, frac, nelem)
 
   /* Jump to special routine if CYLVAR coords */
 
-  if (xdom[0].coord_type == CYLVAR)
+  if (zdom[0].coord_type == CYLVAR)
     {
 
       n = cylvar_coord_fraction (ichoice, x, ii, frac, nelem);
@@ -329,17 +329,17 @@ coord_fraction (ichoice, x, ii, frac, nelem)
     }
 
   /* Now convert x to the appropriate coordinate system */
-  if (xdom[0].coord_type == CYLIND)
+  if (zdom[0].coord_type == CYLIND)
     {
       r = sqrt (x[0] * x[0] + x[1] * x[1]);
       z = fabs (x[2]);
     }
-  else if (xdom[0].coord_type == RTHETA)
+  else if (zdom[0].coord_type == RTHETA)
     {
       r = length (x);
       z = acos (fabs (x[2]) / r) * RADIAN;
     }
-  else if (xdom[0].coord_type == SPHERICAL)
+  else if (zdom[0].coord_type == SPHERICAL)
     {
       r = length (x);
       z = 0;			// To avoid -O3 warning
@@ -348,13 +348,13 @@ coord_fraction (ichoice, x, ii, frac, nelem)
     {
       Error
 	("coord_fraction: Don't know how to handle this coordinate type %d\n",
-	 xdom[0].coord_type);
+	 zdom[0].coord_type);
       exit (0);
     }
 
-  if (xdom[0].coord_type == SPHERICAL)
+  if (zdom[0].coord_type == SPHERICAL)
     {				/* We are dealing with a 1d system */
-      fraction (r, xx, xdom[0].NDIM, &ix, &dr, 0); //linear space
+      fraction (r, xx, zdom[0].NDIM, &ix, &dr, 0); //linear space
       ii[0] = ix;
       frac[0] = (1. - dr);
       ii[1] = ix + 1;
@@ -367,19 +367,19 @@ coord_fraction (ichoice, x, ii, frac, nelem)
     }
   else
     {				/* We are dealing with a 2d system */
-      fraction (r, xx, xdom[0].NDIM, &ix, &dr, 0);
-      fraction (z, zz, xdom[0].MDIM, &iz, &dz, 0);
+      fraction (r, xx, zdom[0].NDIM, &ix, &dr, 0);
+      fraction (z, zz, zdom[0].MDIM, &iz, &dz, 0);
 
-      ii[0] = ix * xdom[0].MDIM + iz;
+      ii[0] = ix * zdom[0].MDIM + iz;
       frac[0] = (1. - dz) * (1. - dr);
 
-      ii[1] = (ix + 1) * xdom[0].MDIM + iz;
+      ii[1] = (ix + 1) * zdom[0].MDIM + iz;
       frac[1] = (1. - dz) * dr;
 
-      ii[2] = ix * xdom[0].MDIM + iz + 1;
+      ii[2] = ix * zdom[0].MDIM + iz + 1;
       frac[2] = (dz) * (1. - dr);
 
-      ii[3] = (ix + 1) * xdom[0].MDIM + iz + 1;
+      ii[3] = (ix + 1) * zdom[0].MDIM + iz + 1;
       frac[3] = (dz) * (dr);
       *nelem = 4;
 
@@ -393,7 +393,7 @@ coord_fraction (ichoice, x, ii, frac, nelem)
   /* Note that this is a very incoplethe check in the sneste that 
    * the posision could be out of the grid in other directions */
 
-  if (r > xx[xdom[0].NDIM - 1])
+  if (r > xx[zdom[0].NDIM - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -463,7 +463,7 @@ where_in_2dcell (ichoice, x, n, fx, fz)
    * the fractional position of
    */
 
-  if (n < 0 || n + xdom[0].MDIM + 1 >= xdom[0].NDIM2)
+  if (n < 0 || n + zdom[0].MDIM + 1 >= zdom[0].NDIM2)
     {
       if (ierr_where_in_2dcell < 100)
 	{
@@ -477,15 +477,15 @@ where_in_2dcell (ichoice, x, n, fx, fz)
     {
       x00 = wmain[n].x;
       x01 = wmain[n + 1].x;
-      x10 = wmain[n + xdom[0].MDIM].x;
-      x11 = wmain[n + xdom[0].MDIM + 1].x;
+      x10 = wmain[n + zdom[0].MDIM].x;
+      x11 = wmain[n + zdom[0].MDIM + 1].x;
     }
   else
     {
       x00 = wmain[n].xcen;
       x01 = wmain[n + 1].xcen;
-      x10 = wmain[n + xdom[0].MDIM].xcen;
-      x11 = wmain[n + xdom[0].MDIM + 1].xcen;
+      x10 = wmain[n + zdom[0].MDIM].xcen;
+      x11 = wmain[n + zdom[0].MDIM + 1].xcen;
     }
 
   /* Rotate the input vector onto the xz plane
@@ -541,7 +541,7 @@ int
 wind_n_to_ij (n, i, j)
      int n, *i, *j;
 {
-  if (xdom[0].coord_type == SPHERICAL)
+  if (zdom[0].coord_type == SPHERICAL)
     {
       *i = n;
       *j = 0;
@@ -553,8 +553,8 @@ wind_n_to_ij (n, i, j)
 	 n);
 */
     }
-  *i = n / xdom[0].MDIM;
-  *j = n - (*i) * xdom[0].MDIM;
+  *i = n / zdom[0].MDIM;
+  *j = n - (*i) * zdom[0].MDIM;
   return (0);
 }
 
@@ -562,7 +562,7 @@ int
 wind_ij_to_n (i, j, n)
      int *n, i, j;
 {
-  if (xdom[0].coord_type == SPHERICAL)
+  if (zdom[0].coord_type == SPHERICAL)
     {
       Error
 	("Warning: wind_ij_to_n being called for spherical coordinates %d %d\n",
@@ -570,6 +570,6 @@ wind_ij_to_n (i, j, n)
       *n = i;
       return (*n);
     }
-  *n = i * xdom[0].MDIM + j;		// xdom[0].MDIM because the array is in z order
+  *n = i * zdom[0].MDIM + j;		// zdom[0].MDIM because the array is in z order
   return (*n);
 }

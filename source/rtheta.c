@@ -102,7 +102,7 @@ Returns:
 Description:
 
 	In the implementation of cylindrical coordinates, we have defined
-	the wind so that as (n = i * xdom[0].MDIM + j) is incremented, the positions 
+	the wind so that as (n = i * zdom[0].MDIM + j) is incremented, the positions 
 	move in the z direction and then in the x direction, so that that 
 	[i][j] correspond to the x, z position of the cell.
 
@@ -142,33 +142,33 @@ rtheta_make_grid (w)
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
-     to propagate.  This is the reason we divide by xdom[0].NDIM-2 here, rather than xdom[0].NDIM-1 */
+     to propagate.  This is the reason we divide by zdom[0].NDIM-2 here, rather than zdom[0].NDIM-1 */
 
 /* Next two lines for linear intervals */
-  dtheta = 90. / (xdom[0].MDIM - 3);
+  dtheta = 90. / (zdom[0].MDIM - 3);
 
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < xdom[0].NDIM; i++)
+  for (i = 0; i < zdom[0].NDIM; i++)
     {
-      for (j = 0; j < xdom[0].MDIM; j++)
+      for (j = 0; j < zdom[0].MDIM; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 
 
 	  /*Define the grid points */
-	  if (xdom[0].log_linear == 1)
+	  if (zdom[0].log_linear == 1)
 	    {			// linear intervals
 
-	      dr = (geo.rmax - geo.rstar) / (xdom[0].NDIM - 3);
+	      dr = (geo.rmax - geo.rstar) / (zdom[0].NDIM - 3);
 	      w[n].r = geo.rstar + i * dr;
 	      w[n].rcen = w[n].r + 0.5 * dr;
 	    }
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (geo.rmax / geo.rstar)) / (xdom[0].MDIM - 3);
+	      dlogr = (log10 (geo.rmax / geo.rstar)) / (zdom[0].MDIM - 3);
 	      w[n].r = geo.rstar * pow (10., dlogr * (i - 1));
 	      w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (i)) +
 					     pow (10., dlogr * (i - 1)));
@@ -244,7 +244,7 @@ rtheta_make_cones (w)
   int  n;
 
 
-  cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), xdom[0].MDIM);
+  cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), zdom[0].MDIM);
   if (cones_rtheta == NULL)
     {
       Error
@@ -254,7 +254,7 @@ rtheta_make_cones (w)
     }
 
 
-  for (n = 0; n < xdom[0].MDIM; n++)
+  for (n = 0; n < zdom[0].MDIM; n++)
     {
       cones_rtheta[n].z = 0.0;
       cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);	// New definition
@@ -292,20 +292,20 @@ rtheta_wind_complete (w)
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
 
-  for (i = 0; i < xdom[0].NDIM; i++)
+  for (i = 0; i < zdom[0].NDIM; i++)
 	{
-    wind_x[i] = w[i * xdom[0].MDIM].r;
+    wind_x[i] = w[i * zdom[0].MDIM].r;
 }
-  for (j = 0; j < xdom[0].MDIM; j++)
+  for (j = 0; j < zdom[0].MDIM; j++)
     wind_z[j] = w[j].theta;
-  for (i = 0; i < xdom[0].NDIM - 1; i++)
-    wind_midx[i] = w[i * xdom[0].MDIM].rcen;
-  for (j = 0; j < xdom[0].MDIM - 1; j++)
+  for (i = 0; i < zdom[0].NDIM - 1; i++)
+    wind_midx[i] = w[i * zdom[0].MDIM].rcen;
+  for (j = 0; j < zdom[0].MDIM - 1; j++)
     wind_midz[j] = w[j].thetacen;
   /* Add something plausible for the edges */
-  /* ?? It is bizarre that one needs to do anything like this ???. wind should be defined to include xdom[0].NDIM -1 */
-  wind_midx[xdom[0].NDIM - 1] = 2. * wind_x[xdom[0].NDIM - 1] - wind_midx[xdom[0].NDIM - 2];
-  wind_midz[xdom[0].MDIM - 1] = 2. * wind_z[xdom[0].MDIM - 1] - wind_midz[xdom[0].MDIM - 2];
+  /* ?? It is bizarre that one needs to do anything like this ???. wind should be defined to include zdom[0].NDIM -1 */
+  wind_midx[zdom[0].NDIM - 1] = 2. * wind_x[zdom[0].NDIM - 1] - wind_midx[zdom[0].NDIM - 2];
+  wind_midz[zdom[0].MDIM - 1] = 2. * wind_z[zdom[0].MDIM - 1] - wind_midz[zdom[0].MDIM - 2];
 
   return (0);
 }
@@ -370,9 +370,9 @@ rtheta_volumes (w, icomp)
   double rmin, rmax, thetamin, thetamax;
   int n_inwind;
 
-  for (i = 0; i < xdom[0].NDIM; i++)
+  for (i = 0; i < zdom[0].NDIM; i++)
     {
-      for (j = 0; j < xdom[0].MDIM; j++)
+      for (j = 0; j < zdom[0].MDIM; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 	  if (w[n].inwind == W_NOT_INWIND)
@@ -466,7 +466,7 @@ rtheta_volumes (w, icomp)
  Returns:
  	where_in_grid normally  returns the cell number associated with
  		a position.  If the position is in the grid this will be a positive
- 		integer < xdom[0].NDIM*xdom[0].MDIM.
+ 		integer < zdom[0].NDIM*zdom[0].MDIM.
  	x is inside the grid        -1
 	x is outside the grid       -2
  Description:	
@@ -502,8 +502,8 @@ rtheta_where_in_grid (x)
   theta = acos ((fabs (x[2] / r))) * RADIAN;
 
   /* Check to see if x is outside the region of the calculation */
-//  if (r > wind_x[xdom[0].MDIM - 1])  /* ERROR NSH 130626 - wind_x has xdom[0].NDIM members, so this check fails every time if the grid is not square! (/
-    if (r > wind_x[xdom[0].NDIM - 1])  /* Fixed version */
+//  if (r > wind_x[zdom[0].MDIM - 1])  /* ERROR NSH 130626 - wind_x has zdom[0].NDIM members, so this check fails every time if the grid is not square! (/
+    if (r > wind_x[zdom[0].NDIM - 1])  /* Fixed version */
     {
       return (-2);		/* x is outside grid */
     }
@@ -512,8 +512,8 @@ rtheta_where_in_grid (x)
       return (-1);		/*x is inside grid */
     }
 
-  fraction (r, wind_x, xdom[0].NDIM, &i, &f, 0);
-  fraction (theta, wind_z, xdom[0].MDIM, &j, &f, 0);
+  fraction (r, wind_x, zdom[0].NDIM, &i, &f, 0);
+  fraction (theta, wind_z, zdom[0].MDIM, &j, &f, 0);
 
   /* At this point i,j are just outside the x position */
   wind_ij_to_n (i, j, &n);
@@ -636,9 +636,9 @@ rtheta_extend_density (w)
 {
 
   int i, j, n, m;
-  for (i = 0; i < xdom[0].NDIM - 1; i++)
+  for (i = 0; i < zdom[0].NDIM - 1; i++)
     {
-      for (j = 0; j < xdom[0].MDIM - 1; j++)
+      for (j = 0; j < zdom[0].MDIM - 1; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
 	  if (w[n].vol == 0)
@@ -701,7 +701,7 @@ rtheta_is_cell_in_wind (n, icomp)
   /* First check if the cell is in the boundary */
   wind_n_to_ij (n, &i, &j);
 
-  if (i >= (xdom[0].NDIM - 2) && j >= (xdom[0].MDIM - 2))
+  if (i >= (zdom[0].NDIM - 2) && j >= (zdom[0].MDIM - 2))
     {
       return (W_NOT_INWIND);
     }

@@ -51,15 +51,15 @@ xtemp_rad (w)
   int nplasma;
 
   py_wind_min = 0;
-  py_wind_max = xdom[0].NDIM;
+  py_wind_max = zdom[0].NDIM;
 
   /* py_wind_delta can be used to subsample the array */
   py_wind_delta = 1;
-  if (xdom[0].MDIM > 30)
-    py_wind_delta = 1 + xdom[0].MDIM / 30;
+  if (zdom[0].MDIM > 30)
+    py_wind_delta = 1 + zdom[0].MDIM / 30;
 
 
-  if (xdom[0].coord_type != 1)
+  if (zdom[0].coord_type != 1)
     {
       Log
 	("Warning: Since coord type is not cylindrical, next print out may look odd\n");
@@ -69,15 +69,15 @@ xtemp_rad (w)
 
   Log ("   z\\x   ");
   for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-    Log ("%8.2e ", w[i * xdom[0].MDIM].x[0]);
+    Log ("%8.2e ", w[i * zdom[0].MDIM].x[0]);
   Log ("\n");
 
-  for (j = 0; j < xdom[0].MDIM; j++)
+  for (j = 0; j < zdom[0].MDIM; j++)
     {
       Log ("%8.2e ", w[j].x[2]);
       for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
 	{
-	  n = i * xdom[0].MDIM + j;
+	  n = i * zdom[0].MDIM + j;
 	  if (w[n].vol > 0.0)
 	    {
 	      nplasma = w[n].nplasma;
@@ -94,15 +94,15 @@ xtemp_rad (w)
 
   Log ("   z\\x   ");
   for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-    Log ("%8.2e ", w[i * xdom[0].MDIM].x[0]);
+    Log ("%8.2e ", w[i * zdom[0].MDIM].x[0]);
   Log ("\n");
 
-  for (j = 0; j < xdom[0].MDIM; j++)
+  for (j = 0; j < zdom[0].MDIM; j++)
     {
       Log ("%8.2e ", w[j].x[2]);
       for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
 	{
-	  n = i * xdom[0].MDIM + j;
+	  n = i * zdom[0].MDIM + j;
 	  if (w[n].vol > 0.0)
 	    {
 	      nplasma = w[n].nplasma;
