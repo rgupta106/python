@@ -382,7 +382,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int nplasma;
   int nnscat;
 
-  Error("XXX This is not modified for multiple domains; I don't even know what we want\n")
+  Error("XXX This is not modified for multiple domains; I don't even know what we want\n");
 
 
 

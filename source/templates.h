@@ -63,7 +63,7 @@ int vwind_xyz(PhotPtr p, double v[]);
 int wind_div_v(WindPtr w);
 double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);
-int get_random_location(int ndom, int n, int icomp, double x[]);
+int get_random_location(int n, int icomp, double x[]);
 int zero_scatters(void);
 int check_corners_inwind(int ndom, int n, int icomp);
 /* wind.c */

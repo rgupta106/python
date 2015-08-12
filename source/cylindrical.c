@@ -514,6 +514,7 @@ cylind_get_random_location (n, icomp, x)
   double r, rmin, rmax, zmin, zmax;
   double zz;
   double phi;
+  int ndom;
 
   ndom=what_domain(x);
 
