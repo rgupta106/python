@@ -528,7 +528,8 @@ def make_phot(ion="c_4"):
             energy = eval(records[i][0]) * 13.605693009
             xsection = eval(records[i][1]) * 1e-18
             string = "Phot %10.6f %10.6e" % (energy, xsection)
-            f.write("%s\n" % string)
+            if energy >= ex:
+                f.write("%s\n" % string)
             num += 1
         i += 1
         if i == len(records):
@@ -889,7 +890,7 @@ def print_elvlc(ion="c_4"):
         i += 1
 
 
-def doit(atom="h_1", nlev=10):
+def doit(atom="h_1", nlev=10, next_ion = 'False'):
     """
     Do something magnificent
 
@@ -923,22 +924,23 @@ def doit(atom="h_1", nlev=10):
         xx = ch.ion(element_string, 1e5)
         ex_offset += xx.Ip
         i += 1
-
-    xlevels.add_row(
-        [
-            "LevMacro",
-            xion.Z,
-            xion.Ion + 1,
-            1,
-            0.00000,
-            xion.Ip + ex_offset,
-            1,
-            1.00e21,
-            "Next",
-            0,
-            0,
-        ]
-    )
+    
+    if next_ion == 'True':    
+        xlevels.add_row(
+            [
+                "LevMacro",
+                xion.Z,
+                xion.Ion + 1,
+                1,
+                0.00000,
+                xion.Ip + ex_offset,
+                1,
+                1.00e21,
+                "Next",
+                0,
+                0,
+            ]
+        )
     xlevels.write(
         atom + "_levels.dat", format="ascii.fixed_width_two_line", overwrite=True
     )
