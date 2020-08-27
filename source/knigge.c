@@ -115,12 +115,13 @@ To repeat, kn_dratio is the distance to the focus point in stellar radii!
   rddoub ("KWD.rmin(in_units_of_rstar)", &zdom[ndom].wind_rho_min);
   rddoub ("KWD.rmax(in_units_of_rstar)", &zdom[ndom].wind_rho_max);
 
-  zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rho_min/zdom[ndom].kn_dratio); /* this is in terms of r_min (RG) */
-  zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rho_max/zdom[ndom].kn_dratio); /* this is in terms of r_star (RG) */
+  zdom[ndom].wind_thetamin = atan (zdom[ndom].wind_rho_min/zdom[ndom].kn_dratio); /* units of r_min and d are now consistent (RG) correcting bug #760 */
+  zdom[ndom].wind_thetamax = atan (zdom[ndom].wind_rho_max/zdom[ndom].kn_dratio); /* units of r_max and d are now consistent (RG) correcting bug #760. Now using r_max and not disk radius */
   zdom[ndom].wind_rho_min *= geo.rstar;
   zdom[ndom].wind_rho_max *= geo.rstar;
 
-  /* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is in units of WD radii */
+  /* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is in units of WD radii. Subsequent calculations
+     need to be checked for similar issues to those raised in bug #760 (RG) */
 
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
