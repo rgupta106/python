@@ -13,6 +13,10 @@ Command line usage (if any):
 
     where the ion name is in Chianti notation, e.g c_4 for C IV, fe_25 for Fe XXV and
     nlevels is the number of energy levels to include in the model
+    
+    *Changes as per 27/08/20
+    
+    usage (in terminal window): MakeMacro.py ion_name nlevels True/False
 
 Description:  
 
@@ -528,7 +532,7 @@ def make_phot(ion="c_4"):
             energy = eval(records[i][0]) * 13.605693009
             xsection = eval(records[i][1]) * 1e-18
             string = "Phot %10.6f %10.6e" % (energy, xsection)
-            if energy >= ex:
+            if energy >= ex: #added so that only x-sections with energies greater than threshold appear (RG)
                 f.write("%s\n" % string)
             num += 1
         i += 1
@@ -890,7 +894,7 @@ def print_elvlc(ion="c_4"):
         i += 1
 
 
-def doit(atom="h_1", nlev=10, next_ion = 'False'):
+def doit(atom="h_1", nlev=10, next_ion = 'False'): #added feature to add in first level of next ion (only use for adding in fully ionised state to single electron state) (RG)
     """
     Do something magnificent
 
@@ -925,7 +929,7 @@ def doit(atom="h_1", nlev=10, next_ion = 'False'):
         ex_offset += xx.Ip
         i += 1
     
-    if next_ion == 'True':    
+    if next_ion == 'True': #if True, we add in the fully ionised state level (RG)  
         xlevels.add_row(
             [
                 "LevMacro",
